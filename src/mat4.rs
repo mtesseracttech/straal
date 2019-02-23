@@ -92,6 +92,19 @@ impl Mul<Mat4> for Mat4 {
     }
 }
 
+impl Mul<Vec4> for Mat4 {
+    type Output = Vec4;
+
+    fn mul(self, rhs: Vec4) -> Self::Output {
+        Vec4::new(
+            Vec4::dot(&self.r0, &rhs),
+            Vec4::dot(&self.r1, &rhs),
+            Vec4::dot(&self.r2, &rhs),
+            Vec4::dot(&self.r3, &rhs),
+        )
+    }
+}
+
 impl Mul<Scalar> for Mat4 {
     type Output = Self;
 

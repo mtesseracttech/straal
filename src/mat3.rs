@@ -57,6 +57,29 @@ impl Mat3 {
                   self[0][1], self[1][1], self[2][1],
                   self[0][2], self[1][2], self[2][2])
     }
+
+    pub fn from_euler_xzy(euler_angles: Vec3) -> Mat3 {
+        const DEG_TO_RAD: f32 = std::f32::consts::PI / 180;
+        let euler_angles = euler_angles * DEG_TO_RAD;
+        let sx = euler_angles.x.sin();
+        let cx = euler_angles.x.cos();
+        let sy = euler_angles.y.sin();
+        let cy = euler_angles.y.cos();
+        let sz = euler_angles.z.sin();
+        let cz = euler_angles.z.cos();
+
+        //This one is XYZ
+        /*let rotation_matrix = Mat3::new(
+            c_z * c_y, -s_z * c_x + c_z * s_y * s_x, s_z * s_x + c_z * s_y * c_x,
+            s_z * c_y, c_z * c_x + s_z * s_y * s_x, -c_z * s_x + s_z * s_y * c_x,
+            -s_y, c_y * s_x, c_y * c_x);*/
+
+        let rotation_matrix = Mat3::new(
+            cz * cy, sz, -sy * cz,
+            cx * cy * -sz + sx * sy, cx * cz, cx * -sy * -sz + sx * cy,
+            -sx * cy * -sz + sy * cz, -sx * cz, -sx * -sy * -sz + cy * cz,
+        );
+    }
 }
 
 impl Mul<Mat3> for Mat3 {
@@ -67,6 +90,18 @@ impl Mul<Mat3> for Mat3 {
         Mat3::new(Vec3::dot(&self[0], &rhs[0]), Vec3::dot(&self[0], &rhs[1]), Vec3::dot(&self[0], &rhs[2]),
                   Vec3::dot(&self[1], &rhs[0]), Vec3::dot(&self[1], &rhs[1]), Vec3::dot(&self[1], &rhs[2]),
                   Vec3::dot(&self[2], &rhs[0]), Vec3::dot(&self[2], &rhs[1]), Vec3::dot(&self[2], &rhs[2]))
+    }
+}
+
+impl Mul<Vec3> for Mat3 {
+    type Output = Vec3;
+
+    fn mul(self, rhs: Vec3) -> Self::Output {
+        Vec3::new(
+            Vec3::dot(&self.r0, &rhs),
+            Vec3::dot(&self.r1, &rhs),
+            Vec3::dot(&self.r2, &rhs),
+        )
     }
 }
 

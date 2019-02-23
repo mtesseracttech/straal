@@ -49,6 +49,11 @@ impl Mat2 {
         Self::new(self[0][0], self[1][0],
                   self[0][1], self[1][1])
     }
+
+    pub fn rotation(theta: Scalar) -> Mat2 {
+        let s = theta.sin();
+        let c = theta.cos();
+    }
 }
 
 impl Mul<Mat2> for Mat2 {
@@ -58,6 +63,17 @@ impl Mul<Mat2> for Mat2 {
         let rhs = rhs.transpose();
         Mat2::new(Vec2::dot(&self.r0, &rhs.r0), Vec2::dot(&self.r0, &rhs.r1),
                   Vec2::dot(&self.r1, &rhs.r0), Vec2::dot(&self.r1, &rhs.r1))
+    }
+}
+
+impl Mul<Vec2> for Mat2 {
+    type Output = Vec2;
+
+    fn mul(self, rhs: Vec2) -> Self::Output {
+        Vec2::new(
+            Vec2::dot(&self.r0, &rhs),
+            Vec2::dot(&self.r1, &rhs),
+        )
     }
 }
 

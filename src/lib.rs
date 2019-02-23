@@ -36,10 +36,6 @@ mod tests {
     }
 
     #[test]
-    fn identity_matrices() {}
-
-
-    #[test]
     fn mat2_determinant() {
         let m0 = Mat2::from([
             [10.0, 4.0],
@@ -70,5 +66,33 @@ mod tests {
         ]);
         let det = m0.determinant();
         assert_eq!(0.0, det);
+    }
+
+    #[test]
+    fn matrix_products_and_identities() {
+        let m0 = Mat2::from([[2.0, 4.0], [5.0, 7.0]]);
+        let m1 = Mat2::identity();
+        let m2 = m0 * m1;
+        assert_eq!(m2, m0);
+
+        let m0 = Mat3::from([
+            [10.0, 4.0, 6.0],
+            [8.0, 2.0, 4.0],
+            [11.0, 5.0, 7.0],
+        ]);
+        let m1 = Mat3::identity();
+        let m2 = m0 * m1;
+        assert_eq!(m0, m2);
+
+
+        let m0 = Mat4::from([
+            [10.0, 4.0, 6.0, 9.0],
+            [8.0, 2.0, 4.0, 7.0],
+            [11.0, 5.0, 7.0, 10.0],
+            [3.0, 9.0, 11.0, 2.0],
+        ]);
+        let m1 = Mat4::identity();
+        let m2 = m0 * m1;
+        assert_eq!(m2, m0);
     }
 }
