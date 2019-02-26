@@ -53,7 +53,6 @@ impl Mat4 {
         let sf_04 = self[0][2] * self[2][3] - self[0][3] * self[2][2];
         let sf_05 = self[0][2] * self[1][3] - self[0][3] * self[1][2];
 
-        //Creating the cofactor vector
         let det_cof = Vec4::new(
             (self[1][1] * sf_00 - self[2][1] * sf_01 + self[3][1] * sf_02),
             -(self[0][1] * sf_00 - self[2][1] * sf_03 + self[3][1] * sf_04),
@@ -77,6 +76,14 @@ impl Mat4 {
                   self[0][1], self[1][1], self[2][1], self[3][1],
                   self[0][2], self[1][2], self[2][2], self[3][2],
                   self[0][3], self[1][3], self[2][3], self[3][3])
+    }
+}
+
+impl Not for Mat4 {
+    type Output = Mat4;
+
+    fn not(self) -> Self::Output {
+        self.inverse()
     }
 }
 
@@ -163,10 +170,10 @@ impl fmt::Display for Mat4 {
                    |{:.2} {:.2} {:.2} {:.2}|\n\
                    |{:.2} {:.2} {:.2} {:.2}|\n\
                    ⌊{:.2} {:.2} {:.2} {:.2}⌋",
-               self.r0.x, self.r0.y, self.r0.z, self.r0.w,
-               self.r1.x, self.r1.y, self.r1.z, self.r1.w,
-               self.r2.x, self.r2.y, self.r2.z, self.r2.w,
-               self.r3.x, self.r3.y, self.r3.z, self.r3.w)
+               self[0][0], self[0][1], self[0][2], self[0][3],
+               self[1][0], self[1][1], self[1][2], self[1][3],
+               self[2][0], self[2][1], self[2][2], self[2][3],
+               self[3][0], self[3][1], self[3][2], self[3][3])
     }
 }
 

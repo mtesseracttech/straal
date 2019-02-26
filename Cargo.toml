@@ -7,3 +7,9 @@ edition = "2018"
 [dependencies]
 glium = "*"
 image = "*"
+criterion = "*"
+
+
+[[bench]]
+name = "matrix_benchmarks"
+harness = false

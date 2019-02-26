@@ -53,6 +53,17 @@ impl Mat2 {
     pub fn rotation(theta: Scalar) -> Mat2 {
         let s = theta.sin();
         let c = theta.cos();
+
+        Mat2::new(c, s,
+                  -s, c)
+    }
+}
+
+impl Not for Mat2 {
+    type Output = Mat2;
+
+    fn not(self) -> Self::Output {
+        self.inverse()
     }
 }
 

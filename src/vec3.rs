@@ -175,7 +175,9 @@ impl DivAssign<Vec3> for Vec3 {
 
 
 impl PartialEq for Vec3 {
-    fn eq(&self, other: &Vec3) -> bool { (self.x == other.x) && (self.y == other.y) && (self.z == other.z) }
+    fn eq(&self, other: &Vec3) -> bool {
+        (self.x == other.x) && (self.y == other.y) && (self.z == other.z)
+    }
 }
 
 impl fmt::Display for Vec3 {
@@ -183,9 +185,7 @@ impl fmt::Display for Vec3 {
 }
 
 impl From<(Scalar, Scalar, Scalar)> for Vec3 {
-    fn from(tuple: (Scalar, Scalar, Scalar)) -> Self {
-        Self::new(tuple.0, tuple.1, tuple.2)
-    }
+    fn from(tuple: (Scalar, Scalar, Scalar)) -> Self { Self::new(tuple.0, tuple.1, tuple.2) }
 }
 
 impl From<[f32; 3]> for Vec3 {

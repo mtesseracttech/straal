@@ -58,27 +58,27 @@ impl Mat3 {
                   self[0][2], self[1][2], self[2][2])
     }
 
-    pub fn from_euler_xzy(euler_angles: Vec3) -> Mat3 {
-        const DEG_TO_RAD: f32 = std::f32::consts::PI / 180;
-        let euler_angles = euler_angles * DEG_TO_RAD;
-        let sx = euler_angles.x.sin();
-        let cx = euler_angles.x.cos();
-        let sy = euler_angles.y.sin();
-        let cy = euler_angles.y.cos();
-        let sz = euler_angles.z.sin();
-        let cz = euler_angles.z.cos();
+    pub fn angles_to_axes_zxy(angles: Vec3) -> Mat3 {
+        const DEG_TO_RAD: f32 = std::f32::consts::PI / 180.0;
+        let angles = angles * DEG_TO_RAD;
+        let sx = angles.x.sin();
+        let cx = angles.x.cos();
+        let sy = angles.y.sin();
+        let cy = angles.y.cos();
+        let sz = angles.z.sin();
+        let cz = angles.z.cos();
 
-        //This one is XYZ
-        /*let rotation_matrix = Mat3::new(
-            c_z * c_y, -s_z * c_x + c_z * s_y * s_x, s_z * s_x + c_z * s_y * c_x,
-            s_z * c_y, c_z * c_x + s_z * s_y * s_x, -c_z * s_x + s_z * s_y * c_x,
-            -s_y, c_y * s_x, c_y * c_x);*/
+        Mat3::new(sx * sy * sz + cy * cz, cx * sz, sx * cy * sz - sy * cz,
+                  sx * sy * cz - cy * sz, cx * cz, sy * sz + sx * cy * cz,
+                  cx * sy, -sx, cx * cy)
+    }
+}
 
-        let rotation_matrix = Mat3::new(
-            cz * cy, sz, -sy * cz,
-            cx * cy * -sz + sx * sy, cx * cz, cx * -sy * -sz + sx * cy,
-            -sx * cy * -sz + sy * cz, -sx * cz, -sx * -sy * -sz + cy * cz,
-        );
+impl Not for Mat3 {
+    type Output = Mat3;
+
+    fn not(self) -> Self::Output {
+        self.inverse()
     }
 }
 
