@@ -1,8 +1,5 @@
 use std::fmt;
 use std::ops::*;
-use std::str;
-
-use glium::uniforms::AsUniformValue;
 
 use super::*;
 
@@ -15,7 +12,25 @@ pub struct Vec3 {
 }
 
 impl Vec3 {
-    pub fn new(x: Scalar, y: Scalar, z: Scalar) -> Vec3 { Vec3 { x, y, z } }
+    pub fn new(x: Scalar, y: Scalar, z: Scalar) -> Vec3 {
+        Vec3 { x, y, z }
+    }
+
+    pub fn zero() -> Vec3 {
+        Self::new(0.0, 0.0, 0.0)
+    }
+
+    pub fn up() -> Vec3 {
+        Self::new(0.0, 1.0, 0.0)
+    }
+
+    pub fn right() -> Vec3 {
+        Self::new(1.0, 0.0, 0.0)
+    }
+
+    pub fn forward() -> Vec3 {
+        Self::new(0.0, 0.0, 1.0)
+    }
 
     pub fn dot(lhs: &Vec3, rhs: &Vec3) -> Scalar {
         lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z
@@ -195,6 +210,19 @@ impl From<[f32; 3]> for Vec3 {
 impl From<Vec2> for Vec3 {
     fn from(vec2: Vec2) -> Self { Self::new(vec2.x, vec2.y, 0.0) }
 }
+
+impl From<(Scalar, Vec2)> for Vec3 {
+    fn from(other: (Scalar, Vec2)) -> Self {
+        Self::new(other.0, other.1.x, other.1.y)
+    }
+}
+
+impl From<(Vec2, Scalar)> for Vec3 {
+    fn from(other: (Vec2, Scalar)) -> Self {
+        Self::new(other.0.x, other.0.y, other.1)
+    }
+}
+
 
 impl From<Vec4> for Vec3 {
     fn from(vec4: Vec4) -> Self { Self::new(vec4.x, vec4.y, vec4.z) }

@@ -1,8 +1,5 @@
 use std::fmt;
 use std::ops::*;
-use std::str;
-
-use glium::uniforms::AsUniformValue;
 
 use super::*;
 
@@ -19,6 +16,10 @@ impl Vec4 {
     //Build a new vector4 from 4 scalar (floating point) components
     pub fn new(x: Scalar, y: Scalar, z: Scalar, w: Scalar) -> Vec4 {
         Vec4 { x, y, z, w }
+    }
+
+    pub fn zero() -> Vec4 {
+        Self::new(0.0, 0.0, 0.0, 0.0)
     }
 
     pub fn dot(lhs: &Vec4, rhs: &Vec4) -> Scalar {
@@ -242,9 +243,45 @@ impl From<Vec3> for Vec4 {
     }
 }
 
+impl From<(Vec3, Scalar)> for Vec4 {
+    fn from(other: (Vec3, Scalar)) -> Self {
+        Self::new(other.0.x, other.0.y, other.0.z, other.1)
+    }
+}
+
+impl From<(Scalar, Vec3)> for Vec4 {
+    fn from(other: (Scalar, Vec3)) -> Self {
+        Self::new(other.0, other.1.x, other.1.y, other.1.z)
+    }
+}
+
 impl From<Vec2> for Vec4 {
     fn from(vec2: Vec2) -> Self {
         Self::new(vec2.x, vec2.y, 0.0, 0.0)
+    }
+}
+
+impl From<(Vec2, Vec2)> for Vec4 {
+    fn from(other: (Vec2, Vec2)) -> Self {
+        Self::new(other.0.x, other.0.y, other.1.x, other.1.y)
+    }
+}
+
+impl From<(Scalar, Scalar, Vec2)> for Vec4 {
+    fn from(other: (Scalar, Scalar, Vec2)) -> Self {
+        Self::new(other.0, other.1, other.2.x, other.2.y)
+    }
+}
+
+impl From<(Vec2, Scalar, Scalar)> for Vec4 {
+    fn from(other: (Vec2, Scalar, Scalar)) -> Self {
+        Self::new(other.0.x, other.0.y, other.1, other.2)
+    }
+}
+
+impl From<(Scalar, Vec2, Scalar)> for Vec4 {
+    fn from(other: (Scalar, Vec2, Scalar)) -> Self {
+        Self::new(other.0, other.1.x, other.1.y, other.2)
     }
 }
 

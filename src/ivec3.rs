@@ -1,8 +1,5 @@
 use std::fmt;
 use std::ops::*;
-use std::str;
-
-use glium::uniforms::AsUniformValue;
 
 use super::*;
 

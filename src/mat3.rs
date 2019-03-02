@@ -1,8 +1,5 @@
 use std::fmt;
 use std::ops::*;
-use std::str;
-
-use glium::uniforms::AsUniformValue;
 
 use super::*;
 
@@ -109,10 +106,10 @@ impl Mul<Scalar> for Mat3 {
     type Output = Self;
 
     fn mul(self, rhs: Scalar) -> Self::Output {
-        let output = self.clone();
-        output.r0 * rhs;
-        output.r1 * rhs;
-        output.r2 * rhs;
+        let mut output = self.clone();
+        output.r0 *= rhs;
+        output.r1 *= rhs;
+        output.r2 *= rhs;
         output
     }
 }
@@ -120,6 +117,44 @@ impl Mul<Scalar> for Mat3 {
 impl From<[[Scalar; 3]; 3]> for Mat3 {
     fn from(mat: [[f32; 3]; 3]) -> Self {
         Self::new_from_arrs(mat[0], mat[1], mat[2])
+    }
+}
+
+impl From<Quat> for Mat3 {
+    fn from(q: Quat) -> Self {
+        let a2 = q.w * q.w;
+        let b2 = q.x * q.x;
+        let c2 = q.y * q.y;
+        let d2 = q.z * q.z;
+
+        //Normalizes the quaternion, to be sure
+        let inv = 1.0 / (a2 + b2 + c2 + d2);
+
+        let r0c0 = (a2 + b2 - c2 - d2) * inv;
+        let r1c1 = (a2 - b2 + c2 - d2) * inv;
+        let r2c2 = (a2 - b2 - c2 + d2) * inv;
+
+        let t1 = q.x * q.y;
+        let t2 = q.z * q.w;
+
+        let r1c0 = 2.0 * (t1 + t2) * inv;
+        let r0c1 = 2.0 * (t1 - t2) * inv;
+
+        let t1 = q.x * q.z;
+        let t2 = q.y * q.w;
+
+        let r2c0 = 2.0 * (t1 - t2) * inv;
+        let r0c2 = 2.0 * (t1 + t2) * inv;
+
+        let t1 = q.y * q.z;
+        let t2 = q.x * q.w;
+
+        let r2c1 = 2.0 * (t1 + t2) * inv;
+        let r1c2 = 2.0 * (t1 - t2) * inv;
+
+        Self::new(r0c0, r0c1, r0c2,
+                  r1c0, r1c1, r1c2,
+                  r2c0, r2c1, r2c2)
     }
 }
 

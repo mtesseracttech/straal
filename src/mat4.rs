@@ -1,8 +1,5 @@
 use std::fmt;
 use std::ops::*;
-use std::str;
-
-use glium::uniforms::AsUniformValue;
 
 use super::*;
 
@@ -54,9 +51,9 @@ impl Mat4 {
         let sf_05 = self[0][2] * self[1][3] - self[0][3] * self[1][2];
 
         let det_cof = Vec4::new(
-            (self[1][1] * sf_00 - self[2][1] * sf_01 + self[3][1] * sf_02),
+            self[1][1] * sf_00 - self[2][1] * sf_01 + self[3][1] * sf_02,
             -(self[0][1] * sf_00 - self[2][1] * sf_03 + self[3][1] * sf_04),
-            (self[0][1] * sf_01 - self[1][1] * sf_03 + self[3][1] * sf_05),
+            self[0][1] * sf_01 - self[1][1] * sf_03 + self[3][1] * sf_05,
             -(self[0][1] * sf_02 - self[1][1] * sf_04 + self[2][1] * sf_05),
         );
 
@@ -116,11 +113,11 @@ impl Mul<Scalar> for Mat4 {
     type Output = Self;
 
     fn mul(self, rhs: Scalar) -> Self::Output {
-        let output = self.clone();
-        output.r0 * rhs;
-        output.r1 * rhs;
-        output.r2 * rhs;
-        output.r3 * rhs;
+        let mut output = self.clone();
+        output.r0 *= rhs;
+        output.r1 *= rhs;
+        output.r2 *= rhs;
+        output.r3 *= rhs;
         output
     }
 }
@@ -128,6 +125,44 @@ impl Mul<Scalar> for Mat4 {
 impl From<[[Scalar; 4]; 4]> for Mat4 {
     fn from(mat: [[f32; 4]; 4]) -> Self {
         Self::new_from_arrs(mat[0], mat[1], mat[2], mat[3])
+    }
+}
+
+impl From<Quat> for Mat4 {
+    fn from(q: Quat) -> Self {
+        let a2 = q.w * q.w;
+        let b2 = q.x * q.x;
+        let c2 = q.y * q.y;
+        let d2 = q.z * q.z;
+
+        let inv = 1.0 / (a2 + b2 + c2 + d2);
+
+        let r0c0 = (a2 + b2 - c2 - d2) * inv;
+        let r1c1 = (a2 - b2 + c2 - d2) * inv;
+        let r2c2 = (a2 - b2 - c2 + d2) * inv;
+
+        let t0 = q.x * q.y;
+        let t1 = q.z * q.w;
+
+        let r1c0 = 2.0 * (t0 + t1) * inv;
+        let r0c1 = 2.0 * (t0 - t1) * inv;
+
+        let t0 = q.x * q.z;
+        let t1 = q.y * q.w;
+
+        let r2c0 = 2.0 * (t0 - t1) * inv;
+        let r0c2 = 2.0 * (t0 + t1) * inv;
+
+        let t0 = q.y * q.z;
+        let t1 = q.x * q.w;
+
+        let r2c1 = 2.0 * (t0 + t1) * inv;
+        let r1c2 = 2.0 * (t0 - t1) * inv;
+
+        Self::new(r0c0, r0c1, r0c2, 0.0,
+                  r1c0, r1c1, r1c2, 0.0,
+                  r2c0, r2c1, r2c2, 0.0,
+                  0.0, 0.0, 0.0, 1.0)
     }
 }
 

@@ -1,8 +1,5 @@
 use std::fmt;
 use std::ops::*;
-use std::str;
-
-use glium::uniforms::AsUniformValue;
 
 use super::*;
 
@@ -14,7 +11,21 @@ pub struct Vec2 {
 }
 
 impl Vec2 {
-    pub fn new(x: Scalar, y: Scalar) -> Vec2 { Vec2 { x, y } }
+    pub fn new(x: Scalar, y: Scalar) -> Vec2 {
+        Vec2 { x, y }
+    }
+
+    pub fn zero() -> Vec2 {
+        Self::new(0.0, 0.0)
+    }
+
+    pub fn right() -> Vec2 {
+        Self::new(1.0, 0.0)
+    }
+
+    pub fn up() -> Vec2 {
+        Self::new(0.0, 1.0)
+    }
 
     pub fn dot(lhs: &Vec2, rhs: &Vec2) -> Scalar {
         lhs.x * rhs.x + lhs.y * rhs.y

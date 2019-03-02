@@ -1,7 +1,7 @@
 mod test_helpers;
 
 #[cfg(test)]
-pub mod matrix_tests {
+pub mod matrix_test {
     use straal::*;
 
     use crate::test_helpers::*;

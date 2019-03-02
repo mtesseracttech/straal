@@ -1,8 +1,5 @@
 use std::fmt;
 use std::ops::*;
-use std::str;
-
-use glium::uniforms::AsUniformValue;
 
 use super::*;
 
@@ -92,9 +89,9 @@ impl Mul<Scalar> for Mat2 {
     type Output = Self;
 
     fn mul(self, rhs: Scalar) -> Self::Output {
-        let output = self.clone();
-        output.r0 * rhs;
-        output.r1 * rhs;
+        let mut output = self.clone();
+        output.r0 *= rhs;
+        output.r1 *= rhs;
         output
     }
 }
