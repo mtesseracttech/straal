@@ -37,16 +37,27 @@ impl Mat3 {
     }
 
     pub fn determinant(&self) -> Scalar {
-        self[0][0] * (self[1][1] * self[2][2] - self[1][2] * self[2][1]) -
-            self[0][1] * (self[1][0] * self[2][2] - self[1][2] * self[2][0]) +
-            self[0][2] * (self[1][0] * self[2][1] - self[1][1] * self[2][0])
+        self[0][0] * (self[1][1] * self[2][2] - self[2][1] * self[1][2]) -
+            self[1][0] * (self[0][1] * self[2][2] - self[2][1] * self[0][2]) +
+            self[2][0] * (self[0][1] * self[1][2] - self[1][1] * self[0][2])
     }
 
-    pub fn inverse(&self) -> Self {
-        let inv_det = 1.0 / self.determinant();
-        Self::new_from_vec3s(self.r0 * inv_det,
-                             self.r1 * inv_det,
-                             self.r2 * inv_det)
+    pub fn adjoint(&self) -> Mat3 {
+        let r0 = Vec3::new(self[1][1] * self[2][2] - self[1][2] * self[2][1],
+                           -(self[0][1] * self[2][2] - self[0][2] * self[2][1]),
+                           self[0][1] * self[1][2] - self[0][2] * self[1][1]);
+        let r1 = Vec3::new(-(self[1][0] * self[2][2] - self[1][2] * self[2][0]),
+                           self[0][0] * self[2][2] - self[0][2] * self[2][0],
+                           -(self[0][0] * self[1][2] - self[0][2] * self[1][0]));
+        let r2 = Vec3::new(self[1][0] * self[2][1] - self[1][1] * self[2][0],
+                           -(self[0][0] * self[2][1] - self[0][1] * self[2][0]),
+                           self[0][0] * self[1][1] - self[0][1] * self[1][0]);
+
+        Self::new_from_vec3s(r0, r1, r2)
+    }
+
+    pub fn inverse(&self) -> Mat3 {
+        self.adjoint() / self.determinant()
     }
 
     pub fn transpose(&self) -> Self {
@@ -55,6 +66,7 @@ impl Mat3 {
                   self[0][2], self[1][2], self[2][2])
     }
 
+    //Performs a rotation around the cardinal axes, in the order ZXY (handy for camera rotation)
     pub fn angles_to_axes_zxy(angles: Vec3) -> Mat3 {
         const DEG_TO_RAD: f32 = std::f32::consts::PI / 180.0;
         let angles = angles * DEG_TO_RAD;
@@ -65,9 +77,61 @@ impl Mat3 {
         let sz = angles.z.sin();
         let cz = angles.z.cos();
 
-        Mat3::new(sx * sy * sz + cy * cz, cx * sz, sx * cy * sz - sy * cz,
+        Self::new(sx * sy * sz + cy * cz, cx * sz, sx * cy * sz - sy * cz,
                   sx * sy * cz - cy * sz, cx * cz, sy * sz + sx * cy * cz,
                   cx * sy, -sx, cx * cy)
+    }
+
+    pub fn get_euler_angles(&self) -> Vec3 {
+        let mut x = 0.0;
+        let mut y = 0.0;
+        let mut z = 0.0;
+
+        let sp = -self[3][2];
+        if sp <= -1.0 {
+            x = -std::f32::consts::FRAC_PI_2
+        } else if sp >= 1.0 {
+            x = std::f32::consts::FRAC_PI_2
+        } else {
+            x = sp.asin()
+        }
+
+        if sp.abs() > 0.9999 {
+            y = -self[3][1].atan2(self[1][1]);
+            z = 0.0;
+        } else {
+            y = self[1][3].atan2(self[3][3]);
+            z = self[2][1].atan2(self[2][2]);
+        }
+        Vec3::new(x, y, z)
+    }
+
+    //Performs a rotation around an arbitary unit axis
+    pub fn get_angle_axis(n: Vec3, theta: Scalar) -> Mat3 {
+        debug_assert!(n.is_unit());
+        let ct = theta.cos();
+        let st = theta.sin();
+        let p_cos = 1.0 - ct; //1.0 - cos(theta), so basically a cosine from 0 to 2
+
+        Self::new(n.x * n.x * p_cos + ct, n.x * n.y * p_cos + n.z * st, n.x * n.z * p_cos - n.y * st,
+                  n.x * n.y * p_cos - n.z * st, n.y * n.y * p_cos + ct, n.y * n.z * p_cos + n.x * st,
+                  n.x * n.z * p_cos + n.y * st, n.y * n.z * p_cos - n.x * st, n.z * n.z * p_cos + ct)
+    }
+
+    pub fn get_scale(factors: Vec3) -> Mat3 {
+        Self::new(factors.x, 0.0, 0.0,
+                  0.0, factors.y, 0.0,
+                  0.0, 0.0, factors.z)
+    }
+
+    pub fn get_scale_along_axis(n: Vec3, s: Scalar) -> Mat3 {
+        debug_assert!(n.is_unit());
+
+        let s_min_one = s - 1.0;
+
+        Self::new(1.0 + s_min_one * n.x * n.x, s_min_one * n.x * n.y, s_min_one * n.x * n.z,
+                  s_min_one * n.x * n.y, 1.0 + s_min_one * n.y * n.y, s_min_one * n.y * n.z,
+                  s_min_one * n.x * n.z, s_min_one * n.z * n.y, 1.0 + s_min_one * n.z * n.z)
     }
 }
 
@@ -111,6 +175,15 @@ impl Mul<Scalar> for Mat3 {
         output.r1 *= rhs;
         output.r2 *= rhs;
         output
+    }
+}
+
+impl Div<Scalar> for Mat3 {
+    type Output = Mat3;
+
+    fn div(self, rhs: f32) -> Self::Output {
+        let inv_scale = 1.0 / rhs;
+        self * inv_scale
     }
 }
 

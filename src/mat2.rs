@@ -36,10 +36,13 @@ impl Mat2 {
         self[0][0] * self[1][1] - self[1][0] * self[0][1]
     }
 
+    pub fn adjoint(&self) -> Mat2 {
+        Self::new(self[1][1], -self[0][1],
+                  -self[1][0], self[0][0])
+    }
+
     pub fn inverse(&self) -> Self {
-        let inv_det = 1.0 / self.determinant();
-        Self::new_from_vec2s(self.r0 * inv_det,
-                             self.r1 * inv_det)
+        self.adjoint() / self.determinant()
     }
 
     pub fn transpose(&self) -> Self {
@@ -93,6 +96,15 @@ impl Mul<Scalar> for Mat2 {
         output.r0 *= rhs;
         output.r1 *= rhs;
         output
+    }
+}
+
+impl Div<Scalar> for Mat2 {
+    type Output = Mat2;
+
+    fn div(self, rhs: f32) -> Self::Output {
+        let inv_scale = 1.0 / rhs;
+        self * inv_scale
     }
 }
 

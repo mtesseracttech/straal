@@ -16,12 +16,12 @@ pub mod matrix_test {
         assert_eq!(-12.0, det);
 
         let m0 = Mat3::from([
-            [10.0, 4.0, 6.0],
-            [8.0, 2.0, 4.0],
-            [11.0, 5.0, 7.0]
+            [2.0, -3.0, 1.0],
+            [2.0, 0.0, -1.0],
+            [1.0, 4.0, 5.0]
         ]);
         let det = m0.determinant();
-        assert_eq!(0.0, det);
+        assert_eq!(49.0, det);
 
         let m0 = Mat4::from([
             [10.0, 4.0, 6.0, 9.0],
@@ -66,12 +66,32 @@ pub mod matrix_test {
 
     #[test]
     fn matrix_inverses() {
-        let base = Mat2::new(1.0, 2.0,
-                             -2.0, -1.0);
+        let base = Mat2::new(4.0, 7.0,
+                             2.0, 6.0);
         let inv = base.inverse();
+        let prod = base * inv;
         let det = base.determinant();
-        println!("Base:\n{}\n Determinant: {}\nInverse:\n{}", base, det, inv);
-        assert_eq!(Mat2::identity(), base * inv);
+        println!("Base:\n{}\n Determinant: {}\nInverse:\n{} \nProduct: \n{}", base, det, inv, prod);
+        assert_eq!(Mat2::identity(), prod);
+
+        let base = Mat3::new(2.0, -3.0, 1.0,
+                             2.0, 0.0, -1.0,
+                             1.0, 4.0, 5.0);
+        let inv = base.inverse();
+        let prod = base * inv;
+        let det = base.determinant();
+        println!("Base:\n{}\n Determinant: {}\nInverse:\n{} \nProduct: \n{}", base, det, inv, prod);
+        assert_eq!(Mat3::identity(), prod);
+
+        let base = Mat4::new(2.0, -3.0, 1.0, -3.45,
+                             2.0, 0.0, -1.0, 232.2,
+                             1.0, 4.0, 5.0, 7.223,
+                             32.0, -0.453, 232.23, 1.0);
+        let inv = base.inverse();
+        let prod = base * inv;
+        let det = base.determinant();
+        println!("Base:\n{}\n Determinant: {}\nInverse:\n{} \nProduct: \n{}", base, det, inv, prod);
+        assert_eq!(Mat4::identity(), prod);
     }
 
     #[test]

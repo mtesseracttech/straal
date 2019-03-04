@@ -39,6 +39,10 @@ impl Vec2 {
         self.length_squared().sqrt()
     }
 
+    pub fn is_unit(&self) -> bool {
+        self.length_squared() == 1.0
+    }
+
     pub fn size() -> usize {
         2
     }
@@ -171,7 +175,7 @@ impl Div<Vec2> for Vec2 {
 
 impl PartialEq for Vec2 {
     fn eq(&self, other: &Vec2) -> bool {
-        (self.x == other.x) && (self.y == other.y)
+        self.x.approx_eq(other.x, DEFAULT_EPSILON) && self.y.approx_eq(other.y, DEFAULT_EPSILON)
     }
 }
 

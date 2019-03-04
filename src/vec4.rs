@@ -36,6 +36,11 @@ impl Vec4 {
         self.length_squared().sqrt()
     }
 
+    pub fn is_unit(&self) -> bool {
+        self.length_squared() == 1.0
+    }
+
+
     pub fn size() -> usize {
         4
     }
@@ -215,7 +220,7 @@ impl DivAssign<Vec4> for Vec4 {
 
 impl PartialEq for Vec4 {
     fn eq(&self, other: &Vec4) -> bool {
-        (self.x == other.x) && (self.y == other.y) && (self.z == other.z) && (self.w == other.w)
+        self.x.approx_eq(other.x, DEFAULT_EPSILON) && self.y.approx_eq(other.y, DEFAULT_EPSILON) && self.z.approx_eq(other.z, DEFAULT_EPSILON) && self.w.approx_eq(other.w, DEFAULT_EPSILON)
     }
 }
 

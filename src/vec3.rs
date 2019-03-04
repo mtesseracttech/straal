@@ -50,6 +50,10 @@ impl Vec3 {
         self.length_squared().sqrt()
     }
 
+    pub fn is_unit(&self) -> bool {
+        self.length_squared() == 1.0
+    }
+
     pub fn size() -> usize {
         3
     }
@@ -191,7 +195,7 @@ impl DivAssign<Vec3> for Vec3 {
 
 impl PartialEq for Vec3 {
     fn eq(&self, other: &Vec3) -> bool {
-        (self.x == other.x) && (self.y == other.y) && (self.z == other.z)
+        self.x.approx_eq(other.x, DEFAULT_EPSILON) && self.y.approx_eq(other.y, DEFAULT_EPSILON) && self.z.approx_eq(other.z, DEFAULT_EPSILON)
     }
 }
 

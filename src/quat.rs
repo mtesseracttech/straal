@@ -152,7 +152,8 @@ impl Div<Scalar> for Quat {
 
 impl PartialEq for Quat {
     fn eq(&self, other: &Quat) -> bool {
-        (self.w == other.w) && (self.x == other.x) && (self.y == other.y) && (self.z == other.z)
+        self.w.approx_eq(other.w, DEFAULT_EPSILON) && self.x.approx_eq(other.x, DEFAULT_EPSILON) &&
+            self.y.approx_eq(other.y, DEFAULT_EPSILON) && self.z.approx_eq(other.z, DEFAULT_EPSILON)
     }
 }
 

@@ -60,12 +60,101 @@ impl Mat4 {
         self[0][0] * det_cof[0] + self[1][0] * det_cof[1] + self[2][0] * det_cof[2] + self[3][0] * det_cof[3]
     }
 
+
+    pub fn adjoint(&self) -> Mat4 {
+        //Precalculating subfactors, since all of them are used 4 times
+        let sf00 = self[2][2] * self[3][3] - self[3][2] * self[2][3];
+        let sf01 = self[2][1] * self[3][3] - self[3][1] * self[2][3];
+        let sf02 = self[2][1] * self[3][2] - self[3][1] * self[2][2];
+        let sf03 = self[2][0] * self[3][3] - self[3][0] * self[2][3];
+        let sf04 = self[2][0] * self[3][2] - self[3][0] * self[2][2];
+        let sf05 = self[2][0] * self[3][1] - self[3][0] * self[2][1];
+        let sf06 = self[1][2] * self[3][3] - self[3][2] * self[1][3];
+        let sf07 = self[1][1] * self[3][3] - self[3][1] * self[1][3];
+        let sf08 = self[1][1] * self[3][2] - self[3][1] * self[1][2];
+        let sf09 = self[1][0] * self[3][3] - self[3][0] * self[1][3];
+        let sf10 = self[1][0] * self[3][2] - self[3][0] * self[1][2];
+        let sf11 = self[1][0] * self[3][1] - self[3][0] * self[1][1];
+        let sf12 = self[1][2] * self[2][3] - self[2][2] * self[1][3];
+        let sf13 = self[1][1] * self[2][3] - self[2][1] * self[1][3];
+        let sf14 = self[1][1] * self[2][2] - self[2][1] * self[1][2];
+        let sf15 = self[1][0] * self[2][3] - self[2][0] * self[1][3];
+        let sf16 = self[1][0] * self[2][2] - self[2][0] * self[1][2];
+        let sf17 = self[1][0] * self[2][1] - self[2][0] * self[1][1];
+
+        let r0 = Vec4::new(self[1][1] * sf00 - self[1][2] * sf01 + self[1][3] * sf02,
+                           -(self[1][0] * sf00 - self[1][2] * sf03 + self[1][3] * sf04),
+                           self[1][0] * sf01 - self[1][1] * sf03 + self[1][3] * sf05,
+                           -(self[1][0] * sf02 - self[1][1] * sf04 + self[1][2] * sf05));
+
+        let r1 = Vec4::new(-(self[0][1] * sf00 - self[0][2] * sf01 + self[0][3] * sf02),
+                           self[0][0] * sf00 - self[0][2] * sf03 + self[0][3] * sf04,
+                           -(self[0][0] * sf01 - self[0][1] * sf03 + self[0][3] * sf05),
+                           self[0][0] * sf02 - self[0][1] * sf04 + self[0][2] * sf05);
+
+        let r2 = Vec4::new(self[0][1] * sf06 - self[0][2] * sf07 + self[0][3] * sf08,
+                           -(self[0][0] * sf06 - self[0][2] * sf09 + self[0][3] * sf10),
+                           self[0][0] * sf07 - self[0][1] * sf09 + self[0][3] * sf11,
+                           -(self[0][0] * sf08 - self[0][1] * sf10 + self[0][2] * sf11));
+
+        let r3 = Vec4::new(-(self[0][1] * sf12 - self[0][2] * sf13 + self[0][3] * sf14),
+                           self[0][0] * sf12 - self[0][2] * sf15 + self[0][3] * sf16,
+                           -(self[0][0] * sf13 - self[0][1] * sf15 + self[0][3] * sf17),
+                           self[0][0] * sf14 - self[0][1] * sf16 + self[0][2] * sf17);
+
+        Mat4::new_from_vec4s(r0, r1, r2, r3)
+    }
+
+    //This version does not use the adjoint and determinant functions, because they share a bunch of calculations
+    //that are best left un-abstracted for matrices of this size and up (for reduced memory usage, less redundant computation and potential compiler optimizations)
     pub fn inverse(&self) -> Self {
-        let inv_det = 1.0 / self.determinant();
-        Self::new_from_vec4s(self.r0 * inv_det,
-                             self.r1 * inv_det,
-                             self.r2 * inv_det,
-                             self.r3 * inv_det)
+
+        //TODO: Transposing this stuff
+        //Precalculating subfactors, since all of them are used 4 times
+        let sf00 = self[2][2] * self[3][3] - self[3][2] * self[2][3];
+        let sf01 = self[2][1] * self[3][3] - self[3][1] * self[2][3];
+        let sf02 = self[2][1] * self[3][2] - self[3][1] * self[2][2];
+        let sf03 = self[2][0] * self[3][3] - self[3][0] * self[2][3];
+        let sf04 = self[2][0] * self[3][2] - self[3][0] * self[2][2];
+        let sf05 = self[2][0] * self[3][1] - self[3][0] * self[2][1];
+        let sf06 = self[1][2] * self[3][3] - self[3][2] * self[1][3];
+        let sf07 = self[1][1] * self[3][3] - self[3][1] * self[1][3];
+        let sf08 = self[1][1] * self[3][2] - self[3][1] * self[1][2];
+        let sf09 = self[1][0] * self[3][3] - self[3][0] * self[1][3];
+        let sf10 = self[1][0] * self[3][2] - self[3][0] * self[1][2];
+        let sf11 = self[1][0] * self[3][1] - self[3][0] * self[1][1];
+        let sf12 = self[1][2] * self[2][3] - self[2][2] * self[1][3];
+        let sf13 = self[1][1] * self[2][3] - self[2][1] * self[1][3];
+        let sf14 = self[1][1] * self[2][2] - self[2][1] * self[1][2];
+        let sf15 = self[1][0] * self[2][3] - self[2][0] * self[1][3];
+        let sf16 = self[1][0] * self[2][2] - self[2][0] * self[1][2];
+        let sf17 = self[1][0] * self[2][1] - self[2][0] * self[1][1];
+
+        let r0 = Vec4::new(self[1][1] * sf00 - self[1][2] * sf01 + self[1][3] * sf02,
+                           -(self[1][0] * sf00 - self[1][2] * sf03 + self[1][3] * sf04),
+                           self[1][0] * sf01 - self[1][1] * sf03 + self[1][3] * sf05,
+                           -(self[1][0] * sf02 - self[1][1] * sf04 + self[1][2] * sf05));
+
+        let r1 = Vec4::new(-(self[0][1] * sf00 - self[0][2] * sf01 + self[0][3] * sf02),
+                           self[0][0] * sf00 - self[0][2] * sf03 + self[0][3] * sf04,
+                           -(self[0][0] * sf01 - self[0][1] * sf03 + self[0][3] * sf05),
+                           self[0][0] * sf02 - self[0][1] * sf04 + self[0][2] * sf05);
+
+        let r2 = Vec4::new(self[0][1] * sf06 - self[0][2] * sf07 + self[0][3] * sf08,
+                           -(self[0][0] * sf06 - self[0][2] * sf09 + self[0][3] * sf10),
+                           self[0][0] * sf07 - self[0][1] * sf09 + self[0][3] * sf11,
+                           -(self[0][0] * sf08 - self[0][1] * sf10 + self[0][2] * sf11));
+
+        let r3 = Vec4::new(-(self[0][1] * sf12 - self[0][2] * sf13 + self[0][3] * sf14),
+                           self[0][0] * sf12 - self[0][2] * sf15 + self[0][3] * sf16,
+                           -(self[0][0] * sf13 - self[0][1] * sf15 + self[0][3] * sf17),
+                           self[0][0] * sf14 - self[0][1] * sf16 + self[0][2] * sf17);
+
+        let adj = Mat4::new_from_vec4s(r0, r1, r2, r3);
+
+        let det = self[0][0] * adj[0][0] + self[0][1] * adj[0][1] + self[0][2] * adj[0][2] + self[0][3] * adj[0][3];
+
+        adj / det
     }
 
     pub fn transpose(&self) -> Self {
@@ -73,6 +162,15 @@ impl Mat4 {
                   self[0][1], self[1][1], self[2][1], self[3][1],
                   self[0][2], self[1][2], self[2][2], self[3][2],
                   self[0][3], self[1][3], self[2][3], self[3][3])
+    }
+
+    //Performs a rotation around the cardinal axes, in the order ZXY (handy for camera rotation)
+    pub fn angles_to_axes_zxy(angles: Vec3) -> Mat4 {
+        Self::from(Mat3::angles_to_axes_zxy(angles))
+    }
+
+    pub fn get_angle_axis(n: Vec3, theta: Scalar) -> Mat4 {
+        Self::from(Mat3::get_angle_axis(n, theta))
     }
 }
 
@@ -119,6 +217,15 @@ impl Mul<Scalar> for Mat4 {
         output.r2 *= rhs;
         output.r3 *= rhs;
         output
+    }
+}
+
+impl Div<Scalar> for Mat4 {
+    type Output = Mat4;
+
+    fn div(self, rhs: f32) -> Self::Output {
+        let inv_scale = 1.0 / rhs;
+        self * inv_scale
     }
 }
 
