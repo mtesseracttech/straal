@@ -2,6 +2,8 @@ mod test_helpers;
 
 #[cfg(test)]
 pub mod quat_test {
+    use rand::Rng;
+
     use straal::*;
 
     use crate::test_helpers::*;

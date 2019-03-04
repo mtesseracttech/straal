@@ -1,3 +1,7 @@
+extern crate rand;
+
+use rand::Rng;
+
 use straal::*;
 
 //Test function to verify the correctness of the rolled out implementations of matrix rotations
