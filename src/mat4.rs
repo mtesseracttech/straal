@@ -212,6 +212,24 @@ impl fmt::Display for Mat4 {
     }
 }
 
+impl From<Mat2> for Mat4 {
+    fn from(mat: Mat2) -> Self {
+        Self::new_from_vec4s(Vec4::from(mat[0]),
+                             Vec4::from(mat[1]),
+                             Vec4::new(0.0, 0.0, 1.0, 0.0),
+                             Vec4::new(0.0, 0.0, 0.0, 1.0))
+    }
+}
+
+impl From<Mat3> for Mat4 {
+    fn from(mat: Mat3) -> Self {
+        Self::new_from_vec4s(Vec4::from(mat[0]),
+                             Vec4::from(mat[1]),
+                             Vec4::from(mat[2]),
+                             Vec4::new(0.0, 0.0, 0.0, 1.0))
+    }
+}
+
 impl glium::uniforms::AsUniformValue for Mat4 {
     fn as_uniform_value(&self) -> glium::uniforms::UniformValue {
         unsafe { glium::uniforms::UniformValue::Mat4(std::mem::transmute::<Self, [[f32; 4]; 4]>(self.transpose())) }

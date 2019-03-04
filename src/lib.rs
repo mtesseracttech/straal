@@ -1,5 +1,7 @@
 #![allow(dead_code)]
 
+extern crate rand;
+
 pub use ivec2::*;
 pub use ivec3::*;
 pub use ivec4::*;
@@ -24,3 +26,4 @@ pub mod vec4;
 
 pub type Scalar = f32;
 pub type Integer = i32;
+

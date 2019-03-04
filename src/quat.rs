@@ -82,23 +82,20 @@ impl Quat {
     }
 
     pub fn to_euler_rad_zxy(&self) -> Vec3 {
-        const RAD_TO_DEG: f32 = 180.0 / std::f32::consts::PI;
         const HALF_PI: f32 = std::f32::consts::PI / 2.0;
 
         let sine_pitch = 2.0 * (self.w * self.x + self.y * self.z);
-        println!("Sine pitch: {}", sine_pitch);
-        println!("{}", self);
         if sine_pitch.abs() > 0.9999 {
             println!("using the sp abs line");
-            let pitch = HALF_PI * sine_pitch;
-            let heading = 0.0;
-            let bank = (self.x * self.z + self.w * self.y).atan2(0.5 - self.y * self.y - self.z * self.z);
-            Vec3 { x: pitch, y: heading, z: bank }
+            let x = HALF_PI * sine_pitch;
+            let y = 0.0;
+            let z = (self.x * self.z + self.w * self.y).atan2(0.5 - self.y * self.y - self.z * self.z);
+            Vec3 { x, y, z }
         } else {
-            let pitch = sine_pitch.asin();
-            let heading = (-self.x * self.z + self.w * self.y).atan2(0.5 - self.x * self.x - self.y * self.y);
-            let bank = (-self.x * self.y + self.z * self.w).atan2(0.5 - self.x * self.x - self.z * self.z);
-            Vec3 { x: pitch, y: heading, z: bank }
+            let x = sine_pitch.asin();
+            let y = (-self.x * self.z + self.w * self.y).atan2(0.5 - self.x * self.x - self.y * self.y);
+            let z = (-self.x * self.y + self.z * self.w).atan2(0.5 - self.x * self.x - self.z * self.z);
+            Vec3 { x, y, z }
         }
     }
 }
@@ -161,7 +158,7 @@ impl PartialEq for Quat {
 
 impl fmt::Display for Quat {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "({:.2} ({:.2}i {:.2}j {:.2}k)) euler: {}", self.w, self.x, self.y, self.z, self.to_euler_deg_zxy())
+        write!(f, "{:.2} ({:.2}i {:.2}j {:.2}k)", self.w, self.x, self.y, self.z)
     }
 }
 

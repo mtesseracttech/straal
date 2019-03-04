@@ -65,6 +65,16 @@ pub mod matrix_test {
     }
 
     #[test]
+    fn matrix_inverses() {
+        let base = Mat2::new(1.0, 2.0,
+                             -2.0, -1.0);
+        let inv = base.inverse();
+        let det = base.determinant();
+        println!("Base:\n{}\n Determinant: {}\nInverse:\n{}", base, det, inv);
+        assert_eq!(Mat2::identity(), base * inv);
+    }
+
+    #[test]
     fn rotation_matrices() {
         let m0 = Mat3::angles_to_axes_zxy(Vec3::new(89.0, 89.0, 89.0));
         let m1 = angles_to_axes_zxy_unoptimized(Vec3::new(89.0, 89.0, 89.0));
