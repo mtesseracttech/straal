@@ -195,7 +195,7 @@ impl DivAssign<Vec3> for Vec3 {
 
 impl PartialEq for Vec3 {
     fn eq(&self, other: &Vec3) -> bool {
-        self.x.approx_eq(other.x, DEFAULT_EPSILON) && self.y.approx_eq(other.y, DEFAULT_EPSILON) && self.z.approx_eq(other.z, DEFAULT_EPSILON)
+        self.x.approx_eq(other.x, DEF_F32_EPSILON) && self.y.approx_eq(other.y, DEF_F32_EPSILON) && self.z.approx_eq(other.z, DEF_F32_EPSILON)
     }
 }
 

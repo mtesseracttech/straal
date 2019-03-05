@@ -27,7 +27,7 @@ pub mod vec4;
 pub type Scalar = f32;
 pub type Integer = i32;
 
-const DEFAULT_EPSILON: f32 = 0.000001;
+const DEF_F32_EPSILON: f32 = 0.00001;
 
 trait ApproxEqual {
     fn approx_eq(self, rhs: Self, epsilon: f32) -> bool;

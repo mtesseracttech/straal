@@ -71,7 +71,6 @@ pub mod matrix_test {
         let inv = base.inverse();
         let prod = base * inv;
         let det = base.determinant();
-        println!("Base:\n{}\n Determinant: {}\nInverse:\n{} \nProduct: \n{}", base, det, inv, prod);
         assert_eq!(Mat2::identity(), prod);
 
         let base = Mat3::new(2.0, -3.0, 1.0,
@@ -80,13 +79,11 @@ pub mod matrix_test {
         let inv = base.inverse();
         let prod = base * inv;
         let det = base.determinant();
-        println!("Base:\n{}\n Determinant: {}\nInverse:\n{} \nProduct: \n{}", base, det, inv, prod);
-        assert_eq!(Mat3::identity(), prod);
 
         let base = Mat4::new(2.0, -3.0, 1.0, -3.45,
-                             2.0, 0.0, -1.0, 232.2,
+                             2.0, 0.0, -1.0, 232.34267,
                              1.0, 4.0, 5.0, 7.223,
-                             32.0, -0.453, 232.23, 1.0);
+                             32.0, -0.453, 23.23, 1.0);
         let inv = base.inverse();
         let prod = base * inv;
         let det = base.determinant();

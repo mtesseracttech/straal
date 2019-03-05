@@ -152,8 +152,8 @@ impl Div<Scalar> for Quat {
 
 impl PartialEq for Quat {
     fn eq(&self, other: &Quat) -> bool {
-        self.w.approx_eq(other.w, DEFAULT_EPSILON) && self.x.approx_eq(other.x, DEFAULT_EPSILON) &&
-            self.y.approx_eq(other.y, DEFAULT_EPSILON) && self.z.approx_eq(other.z, DEFAULT_EPSILON)
+        self.w.approx_eq(other.w, DEF_F32_EPSILON) && self.x.approx_eq(other.x, DEF_F32_EPSILON) &&
+            self.y.approx_eq(other.y, DEF_F32_EPSILON) && self.z.approx_eq(other.z, DEF_F32_EPSILON)
     }
 }
 

@@ -175,7 +175,7 @@ impl Div<Vec2> for Vec2 {
 
 impl PartialEq for Vec2 {
     fn eq(&self, other: &Vec2) -> bool {
-        self.x.approx_eq(other.x, DEFAULT_EPSILON) && self.y.approx_eq(other.y, DEFAULT_EPSILON)
+        self.x.approx_eq(other.x, DEF_F32_EPSILON) && self.y.approx_eq(other.y, DEF_F32_EPSILON)
     }
 }
 
