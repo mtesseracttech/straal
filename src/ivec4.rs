@@ -26,7 +26,7 @@ impl IVec4 {
     }
 
     pub fn length(&self) -> Integer {
-        (self.length_squared() as Scalar).sqrt() as Integer
+        (self.length_squared() as Real).sqrt() as Integer
     }
 
     pub fn size() -> usize {
@@ -204,5 +204,15 @@ impl glium::uniforms::AsUniformValue for IVec4 {
         unsafe {
             glium::uniforms::UniformValue::IntVec4(std::mem::transmute::<Self, [Integer; 4]>(*self))
         }
+    }
+}
+
+unsafe impl glium::vertex::Attribute for IVec4 {
+    fn get_type() -> glium::vertex::AttributeType {
+        glium::vertex::AttributeType::I32I32I32I32
+    }
+
+    fn is_supported<C: ?Sized>(caps: &C) -> bool where C: glium::CapabilitiesSource {
+        true
     }
 }

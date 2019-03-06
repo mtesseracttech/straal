@@ -15,10 +15,10 @@ pub struct Mat4 {
 }
 
 impl Mat4 {
-    pub fn new(r0c0: Scalar, r0c1: Scalar, r0c2: Scalar, r0c3: Scalar,
-               r1c0: Scalar, r1c1: Scalar, r1c2: Scalar, r1c3: Scalar,
-               r2c0: Scalar, r2c1: Scalar, r2c2: Scalar, r2c3: Scalar,
-               r3c0: Scalar, r3c1: Scalar, r3c2: Scalar, r3c3: Scalar) -> Self {
+    pub fn new(r0c0: Real, r0c1: Real, r0c2: Real, r0c3: Real,
+               r1c0: Real, r1c1: Real, r1c2: Real, r1c3: Real,
+               r2c0: Real, r2c1: Real, r2c2: Real, r2c3: Real,
+               r3c0: Real, r3c1: Real, r3c2: Real, r3c3: Real) -> Self {
         Self::new_from_vec4s(Vec4::new(r0c0, r0c1, r0c2, r0c3),
                              Vec4::new(r1c0, r1c1, r1c2, r1c3),
                              Vec4::new(r2c0, r2c1, r2c2, r2c3),
@@ -29,7 +29,7 @@ impl Mat4 {
         Mat4 { r0, r1, r2, r3 }
     }
 
-    pub fn new_from_arrs(r0: [Scalar; 4], r1: [Scalar; 4], r2: [Scalar; 4], r3: [Scalar; 4]) -> Self {
+    pub fn new_from_arrs(r0: [Real; 4], r1: [Real; 4], r2: [Real; 4], r3: [Real; 4]) -> Self {
         Self::new_from_vec4s(Vec4::from(r0), Vec4::from(r1), Vec4::from(r2), Vec4::from(r3))
     }
 
@@ -40,7 +40,7 @@ impl Mat4 {
                   0.0, 0.0, 0.0, 1.0)
     }
 
-    pub fn determinant(&self) -> Scalar {
+    pub fn determinant(&self) -> Real {
         //https://github.com/g-truc/glm/blob/7590260cf81f3e49f492e992f60dd88cd3265d14/glm/detail/func_matrix.inl#L222
         //Calculating the subfactors that will be reused (they all appear twice in the next step)
         let sf_00 = self[2][2] * self[3][3] - self[2][3] * self[3][2];
@@ -103,7 +103,7 @@ impl Mat4 {
                            -(self[0][0] * sf08 - self[0][1] * sf10 + self[0][2] * sf11),
                            self[0][0] * sf14 - self[0][1] * sf16 + self[0][2] * sf17);
 
-        let adj = Mat4::new_from_vec4s(r0, r1, r2, r3);
+        Mat4::new_from_vec4s(r0, r1, r2, r3)
     }
 
     //This version does not use the adjoint and determinant functions, because they share a bunch of calculations
@@ -169,8 +169,19 @@ impl Mat4 {
         Self::from(Mat3::angles_to_axes_zxy(angles))
     }
 
-    pub fn get_angle_axis(n: Vec3, theta: Scalar) -> Mat4 {
+    pub fn get_angle_axis(n: Vec3, theta: Real) -> Mat4 {
         Self::from(Mat3::get_angle_axis(n, theta))
+    }
+
+    pub fn transform(pos: &Vec3) {}
+
+
+    pub fn get_scale_mat(factors: Vec3) -> Mat4 {
+        Self::from(Mat3::get_scale(factors))
+    }
+
+    pub fn get_scale_along_axis_mat(n: Vec3, s: Real) -> Mat4 {
+        Self::from(Mat3::get_scale_along_axis(n, s))
     }
 }
 
@@ -207,10 +218,10 @@ impl Mul<Vec4> for Mat4 {
     }
 }
 
-impl Mul<Scalar> for Mat4 {
+impl Mul<Real> for Mat4 {
     type Output = Self;
 
-    fn mul(self, rhs: Scalar) -> Self::Output {
+    fn mul(self, rhs: Real) -> Self::Output {
         let mut output = self.clone();
         output.r0 *= rhs;
         output.r1 *= rhs;
@@ -220,7 +231,17 @@ impl Mul<Scalar> for Mat4 {
     }
 }
 
-impl Div<Scalar> for Mat4 {
+impl MulAssign<Mat4> for Mat4 {
+    fn mul_assign(&mut self, rhs: Mat4) {
+        let new = *self * rhs;
+        self.r0 = new.r0;
+        self.r1 = new.r1;
+        self.r2 = new.r2;
+        self.r3 = new.r3;
+    }
+}
+
+impl Div<Real> for Mat4 {
     type Output = Mat4;
 
     fn div(self, rhs: f32) -> Self::Output {
@@ -229,7 +250,7 @@ impl Div<Scalar> for Mat4 {
     }
 }
 
-impl From<[[Scalar; 4]; 4]> for Mat4 {
+impl From<[[Real; 4]; 4]> for Mat4 {
     fn from(mat: [[f32; 4]; 4]) -> Self {
         Self::new_from_arrs(mat[0], mat[1], mat[2], mat[3])
     }
@@ -340,5 +361,15 @@ impl From<Mat3> for Mat4 {
 impl glium::uniforms::AsUniformValue for Mat4 {
     fn as_uniform_value(&self) -> glium::uniforms::UniformValue {
         unsafe { glium::uniforms::UniformValue::Mat4(std::mem::transmute::<Self, [[f32; 4]; 4]>(self.transpose())) }
+    }
+}
+
+unsafe impl glium::vertex::Attribute for Mat4 {
+    fn get_type() -> glium::vertex::AttributeType {
+        glium::vertex::AttributeType::F32x4x4
+    }
+
+    fn is_supported<C: ?Sized>(caps: &C) -> bool where C: glium::CapabilitiesSource {
+        true
     }
 }

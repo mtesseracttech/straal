@@ -13,8 +13,8 @@ pub struct Mat2 {
 }
 
 impl Mat2 {
-    pub fn new(r0c0: Scalar, r0c1: Scalar,
-               r1c0: Scalar, r1c1: Scalar) -> Self {
+    pub fn new(r0c0: Real, r0c1: Real,
+               r1c0: Real, r1c1: Real) -> Self {
         Self::new_from_vec2s(Vec2::new(r0c0, r0c1),
                              Vec2::new(r1c0, r1c1))
     }
@@ -23,7 +23,7 @@ impl Mat2 {
         Mat2 { r0, r1 }
     }
 
-    pub fn new_from_arrs(r0: [Scalar; 2], r1: [Scalar; 2]) -> Self {
+    pub fn new_from_arrs(r0: [Real; 2], r1: [Real; 2]) -> Self {
         Self::new_from_vec2s(Vec2::from(r0), Vec2::from(r1))
     }
 
@@ -32,7 +32,7 @@ impl Mat2 {
                   0.0, 1.0)
     }
 
-    pub fn determinant(&self) -> Scalar {
+    pub fn determinant(&self) -> Real {
         self[0][0] * self[1][1] - self[1][0] * self[0][1]
     }
 
@@ -50,7 +50,7 @@ impl Mat2 {
                   self[0][1], self[1][1])
     }
 
-    pub fn rotation(theta: Scalar) -> Mat2 {
+    pub fn rotation(theta: Real) -> Mat2 {
         let s = theta.sin();
         let c = theta.cos();
 
@@ -88,10 +88,10 @@ impl Mul<Vec2> for Mat2 {
     }
 }
 
-impl Mul<Scalar> for Mat2 {
+impl Mul<Real> for Mat2 {
     type Output = Self;
 
-    fn mul(self, rhs: Scalar) -> Self::Output {
+    fn mul(self, rhs: Real) -> Self::Output {
         let mut output = self.clone();
         output.r0 *= rhs;
         output.r1 *= rhs;
@@ -99,7 +99,15 @@ impl Mul<Scalar> for Mat2 {
     }
 }
 
-impl Div<Scalar> for Mat2 {
+impl MulAssign<Mat2> for Mat2 {
+    fn mul_assign(&mut self, rhs: Mat2) {
+        let new = *self * rhs;
+        self.r0 = new.r0;
+        self.r1 = new.r1;
+    }
+}
+
+impl Div<Real> for Mat2 {
     type Output = Mat2;
 
     fn div(self, rhs: f32) -> Self::Output {
@@ -108,7 +116,7 @@ impl Div<Scalar> for Mat2 {
     }
 }
 
-impl From<[[Scalar; 2]; 2]> for Mat2 {
+impl From<[[Real; 2]; 2]> for Mat2 {
     fn from(mat: [[f32; 2]; 2]) -> Self {
         Self::new_from_arrs(mat[0], mat[1])
     }
@@ -155,5 +163,15 @@ impl fmt::Display for Mat2 {
 impl glium::uniforms::AsUniformValue for Mat2 {
     fn as_uniform_value(&self) -> glium::uniforms::UniformValue {
         unsafe { glium::uniforms::UniformValue::Mat2(std::mem::transmute::<Self, [[f32; 2]; 2]>(self.transpose())) }
+    }
+}
+
+unsafe impl glium::vertex::Attribute for Mat2 {
+    fn get_type() -> glium::vertex::AttributeType {
+        glium::vertex::AttributeType::F32x2x2
+    }
+
+    fn is_supported<C: ?Sized>(caps: &C) -> bool where C: glium::CapabilitiesSource {
+        true
     }
 }

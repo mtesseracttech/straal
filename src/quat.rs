@@ -6,14 +6,14 @@ use super::*;
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
 pub struct Quat {
-    pub w: Scalar,
-    pub x: Scalar,
-    pub y: Scalar,
-    pub z: Scalar,
+    pub w: Real,
+    pub x: Real,
+    pub y: Real,
+    pub z: Real,
 }
 
 impl Quat {
-    pub fn new(w: Scalar, x: Scalar, y: Scalar, z: Scalar) -> Quat {
+    pub fn new(w: Real, x: Real, y: Real, z: Real) -> Quat {
         Quat { w, x, y, z }
     }
 
@@ -21,15 +21,15 @@ impl Quat {
         Self::new(1.0, 0.0, 0.0, 0.0)
     }
 
-    pub fn dot(lhs: &Quat, rhs: &Quat) -> Scalar {
+    pub fn dot(lhs: &Quat, rhs: &Quat) -> Real {
         lhs.w * rhs.w + lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z
     }
 
-    fn length_squared(&self) -> Scalar {
+    fn length_squared(&self) -> Real {
         Self::dot(self, self)
     }
 
-    pub fn length(&self) -> Scalar {
+    pub fn length(&self) -> Real {
         self.length_squared().sqrt()
     }
 
@@ -119,10 +119,10 @@ impl Mul<Quat> for Quat {
     }
 }
 
-impl Mul<Scalar> for Quat {
+impl Mul<Real> for Quat {
     type Output = Quat;
 
-    fn mul(self, rhs: Scalar) -> Self::Output {
+    fn mul(self, rhs: Real) -> Self::Output {
         Self::new(self.w * rhs,
                   self.x * rhs,
                   self.y * rhs,
@@ -138,10 +138,10 @@ impl Div<Quat> for Quat {
     }
 }
 
-impl Div<Scalar> for Quat {
+impl Div<Real> for Quat {
     type Output = Quat;
 
-    fn div(self, rhs: Scalar) -> Self::Output {
+    fn div(self, rhs: Real) -> Self::Output {
         let inv = 1.0 / rhs;
         Self::new(self.w * inv,
                   self.x * inv,
@@ -163,14 +163,14 @@ impl fmt::Display for Quat {
     }
 }
 
-impl From<(Scalar, Scalar, Scalar, Scalar)> for Quat {
-    fn from(tuple: (Scalar, Scalar, Scalar, Scalar)) -> Self {
+impl From<(Real, Real, Real, Real)> for Quat {
+    fn from(tuple: (Real, Real, Real, Real)) -> Self {
         Self::new(tuple.0, tuple.1, tuple.2, tuple.3)
     }
 }
 
-impl From<[Scalar; 4]> for Quat {
-    fn from(arr: [Scalar; 4]) -> Self {
+impl From<[Real; 4]> for Quat {
+    fn from(arr: [Real; 4]) -> Self {
         Self::new(arr[0], arr[1], arr[2], arr[3])
     }
 }

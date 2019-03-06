@@ -6,12 +6,12 @@ use super::*;
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
 pub struct Vec2 {
-    pub x: Scalar,
-    pub y: Scalar,
+    pub x: Real,
+    pub y: Real,
 }
 
 impl Vec2 {
-    pub fn new(x: Scalar, y: Scalar) -> Vec2 {
+    pub fn new(x: Real, y: Real) -> Vec2 {
         Vec2 { x, y }
     }
 
@@ -27,15 +27,15 @@ impl Vec2 {
         Self::new(0.0, 1.0)
     }
 
-    pub fn dot(lhs: &Vec2, rhs: &Vec2) -> Scalar {
+    pub fn dot(lhs: &Vec2, rhs: &Vec2) -> Real {
         lhs.x * rhs.x + lhs.y * rhs.y
     }
 
-    pub fn length_squared(&self) -> Scalar {
+    pub fn length_squared(&self) -> Real {
         Vec2::dot(self, self)
     }
 
-    pub fn length(&self) -> Scalar {
+    pub fn length(&self) -> Real {
         self.length_squared().sqrt()
     }
 
@@ -60,7 +60,7 @@ impl Vec2 {
 }
 
 impl Index<usize> for Vec2 {
-    type Output = Scalar;
+    type Output = Real;
     fn index(&self, index: usize) -> &Self::Output {
         match index {
             0 => &self.x,
@@ -113,15 +113,15 @@ impl SubAssign<Vec2> for Vec2 {
 }
 
 
-impl Mul<Scalar> for Vec2 {
+impl Mul<Real> for Vec2 {
     type Output = Self;
 
-    fn mul(self, rhs: Scalar) -> Self::Output { Self::new(self.x * rhs, self.y * rhs) }
+    fn mul(self, rhs: Real) -> Self::Output { Self::new(self.x * rhs, self.y * rhs) }
 }
 
 
-impl MulAssign<Scalar> for Vec2 {
-    fn mul_assign(&mut self, rhs: Scalar) {
+impl MulAssign<Real> for Vec2 {
+    fn mul_assign(&mut self, rhs: Real) {
         self.x *= rhs;
         self.y *= rhs;
     }
@@ -143,17 +143,17 @@ impl MulAssign<Vec2> for Vec2 {
 }
 
 
-impl Div<Scalar> for Vec2 {
+impl Div<Real> for Vec2 {
     type Output = Self;
 
-    fn div(self, rhs: Scalar) -> Self::Output {
+    fn div(self, rhs: Real) -> Self::Output {
         let inv = 1.0 / rhs;
         Self::new(self.x * inv, self.y * inv)
     }
 }
 
-impl DivAssign<Scalar> for Vec2 {
-    fn div_assign(&mut self, rhs: Scalar) {
+impl DivAssign<Real> for Vec2 {
+    fn div_assign(&mut self, rhs: Real) {
         let inv = 1.0 / rhs;
         self.x *= inv;
         self.y *= inv;
@@ -183,8 +183,20 @@ impl fmt::Display for Vec2 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { write!(f, "({:.2} {:.2})", self.x, self.y) }
 }
 
-impl From<(Scalar, Scalar)> for Vec2 {
-    fn from(tuple: (Scalar, Scalar)) -> Self {
+impl From<(u32, u32)> for Vec2 {
+    fn from(sizes: (u32, u32)) -> Self {
+        Self::new(sizes.0 as Real, sizes.1 as Real)
+    }
+}
+
+impl From<(Integer, Integer)> for Vec2 {
+    fn from(ints: (i32, i32)) -> Self {
+        Self::new(ints.0 as Real, ints.1 as Real)
+    }
+}
+
+impl From<(Real, Real)> for Vec2 {
+    fn from(tuple: (Real, Real)) -> Self {
         Self::new(tuple.0, tuple.1)
     }
 }
@@ -204,5 +216,15 @@ impl From<Vec4> for Vec2 {
 impl glium::uniforms::AsUniformValue for Vec2 {
     fn as_uniform_value(&self) -> glium::uniforms::UniformValue {
         unsafe { glium::uniforms::UniformValue::Vec2(std::mem::transmute::<Self, [f32; 2]>(*self)) }
+    }
+}
+
+unsafe impl glium::vertex::Attribute for Vec2 {
+    fn get_type() -> glium::vertex::AttributeType {
+        glium::vertex::AttributeType::F32F32
+    }
+
+    fn is_supported<C: ?Sized>(caps: &C) -> bool where C: glium::CapabilitiesSource {
+        true
     }
 }

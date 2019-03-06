@@ -14,9 +14,9 @@ pub struct Mat3 {
 }
 
 impl Mat3 {
-    pub fn new(r0c0: Scalar, r0c1: Scalar, r0c2: Scalar,
-               r1c0: Scalar, r1c1: Scalar, r1c2: Scalar,
-               r2c0: Scalar, r2c1: Scalar, r2c2: Scalar, ) -> Self {
+    pub fn new(r0c0: Real, r0c1: Real, r0c2: Real,
+               r1c0: Real, r1c1: Real, r1c2: Real,
+               r2c0: Real, r2c1: Real, r2c2: Real, ) -> Self {
         Self::new_from_vec3s(Vec3::new(r0c0, r0c1, r0c2),
                              Vec3::new(r1c0, r1c1, r1c2),
                              Vec3::new(r2c0, r2c1, r2c2))
@@ -26,7 +26,7 @@ impl Mat3 {
         Mat3 { r0, r1, r2 }
     }
 
-    pub fn new_from_arrs(r0: [Scalar; 3], r1: [Scalar; 3], r2: [Scalar; 3]) -> Self {
+    pub fn new_from_arrs(r0: [Real; 3], r1: [Real; 3], r2: [Real; 3]) -> Self {
         Self::new_from_vec3s(Vec3::from(r0), Vec3::from(r1), Vec3::from(r2))
     }
 
@@ -36,7 +36,7 @@ impl Mat3 {
                   0.0, 0.0, 1.0)
     }
 
-    pub fn determinant(&self) -> Scalar {
+    pub fn determinant(&self) -> Real {
         self[0][0] * (self[1][1] * self[2][2] - self[2][1] * self[1][2]) -
             self[1][0] * (self[0][1] * self[2][2] - self[2][1] * self[0][2]) +
             self[2][0] * (self[0][1] * self[1][2] - self[1][1] * self[0][2])
@@ -107,7 +107,7 @@ impl Mat3 {
     }
 
     //Performs a rotation around an arbitary unit axis
-    pub fn get_angle_axis(n: Vec3, theta: Scalar) -> Mat3 {
+    pub fn get_angle_axis(n: Vec3, theta: Real) -> Mat3 {
         debug_assert!(n.is_unit());
         let ct = theta.cos();
         let st = theta.sin();
@@ -118,13 +118,17 @@ impl Mat3 {
                   n.x * n.z * p_cos + n.y * st, n.y * n.z * p_cos - n.x * st, n.z * n.z * p_cos + ct)
     }
 
+    pub fn scale(&mut self, factors: Vec3) {
+        *self *= Self::get_scale(factors);
+    }
+
     pub fn get_scale(factors: Vec3) -> Mat3 {
         Self::new(factors.x, 0.0, 0.0,
                   0.0, factors.y, 0.0,
                   0.0, 0.0, factors.z)
     }
 
-    pub fn get_scale_along_axis(n: Vec3, s: Scalar) -> Mat3 {
+    pub fn get_scale_along_axis(n: Vec3, s: Real) -> Mat3 {
         debug_assert!(n.is_unit());
 
         let s_min_one = s - 1.0;
@@ -166,10 +170,10 @@ impl Mul<Vec3> for Mat3 {
     }
 }
 
-impl Mul<Scalar> for Mat3 {
+impl Mul<Real> for Mat3 {
     type Output = Self;
 
-    fn mul(self, rhs: Scalar) -> Self::Output {
+    fn mul(self, rhs: Real) -> Self::Output {
         let mut output = self.clone();
         output.r0 *= rhs;
         output.r1 *= rhs;
@@ -178,7 +182,16 @@ impl Mul<Scalar> for Mat3 {
     }
 }
 
-impl Div<Scalar> for Mat3 {
+impl MulAssign<Mat3> for Mat3 {
+    fn mul_assign(&mut self, rhs: Mat3) {
+        let new = *self * rhs;
+        self.r0 = new.r0;
+        self.r1 = new.r1;
+        self.r2 = new.r2;
+    }
+}
+
+impl Div<Real> for Mat3 {
     type Output = Mat3;
 
     fn div(self, rhs: f32) -> Self::Output {
@@ -187,7 +200,7 @@ impl Div<Scalar> for Mat3 {
     }
 }
 
-impl From<[[Scalar; 3]; 3]> for Mat3 {
+impl From<[[Real; 3]; 3]> for Mat3 {
     fn from(mat: [[f32; 3]; 3]) -> Self {
         Self::new_from_arrs(mat[0], mat[1], mat[2])
     }
@@ -275,5 +288,15 @@ impl fmt::Display for Mat3 {
 impl glium::uniforms::AsUniformValue for Mat3 {
     fn as_uniform_value(&self) -> glium::uniforms::UniformValue {
         unsafe { glium::uniforms::UniformValue::Mat3(std::mem::transmute::<Self, [[f32; 3]; 3]>(self.transpose())) }
+    }
+}
+
+unsafe impl glium::vertex::Attribute for Mat3 {
+    fn get_type() -> glium::vertex::AttributeType {
+        glium::vertex::AttributeType::F32x3x3
+    }
+
+    fn is_supported<C: ?Sized>(caps: &C) -> bool where C: glium::CapabilitiesSource {
+        true
     }
 }

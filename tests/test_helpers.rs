@@ -56,3 +56,29 @@ pub fn var_quat_multiplication(lhs: [&str; 4], rhs: [&str; 4]) -> [String; 4] {
         format!("{}*{}+{}*{}-{}*{}+{}*{}", lhs[0], rhs[3], lhs[1], rhs[2], lhs[2], rhs[1], lhs[3], rhs[0]),
     ]
 }
+
+pub fn get_perspective_matrix(target_dims: &Vec2) -> Mat4 {
+    let aspect_ratio = target_dims.y as f32 / target_dims.x as f32;
+    let fov = std::f32::consts::PI / 3.0;
+    let z_far = 1024.0;
+    let z_near = 0.1;
+    let f = 1.0 / (fov / 2.0).tan();
+
+    Mat4::new(f * aspect_ratio, 0.0, 0.0, 0.0,
+              0.0, f, 0.0, 0.0,
+              0.0, 0.0, (z_far + z_near) / (z_far - z_near), 1.0,
+              0.0, 0.0, -(2.0 * z_far * z_near) / (z_far - z_near), 0.0)
+}
+
+
+pub fn get_view_matrix(pos: &Vec3, dir: &Vec3, up: &Vec3) -> Mat4 {
+    let fwd = dir.normalized();
+    let rht = Vec3::cross(up, &fwd).normalized();
+    let up = Vec3::cross(&fwd, &rht);
+    let pos = Vec3::new(-Vec3::dot(pos, &rht), -Vec3::dot(pos, &up), -Vec3::dot(pos, &fwd));
+
+    Mat4::new_from_vec4s(Vec4::from((rht, pos.x)),
+                         Vec4::from((up, pos.y)),
+                         Vec4::from((fwd, pos.z)),
+                         Vec4::new(0.0, 0.0, 0.0, 1.0))
+}
