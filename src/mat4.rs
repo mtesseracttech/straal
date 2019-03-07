@@ -360,7 +360,10 @@ impl From<Mat3> for Mat4 {
 
 impl glium::uniforms::AsUniformValue for Mat4 {
     fn as_uniform_value(&self) -> glium::uniforms::UniformValue {
-        unsafe { glium::uniforms::UniformValue::Mat4(std::mem::transmute::<Self, [[f32; 4]; 4]>(self.transpose())) }
+        unsafe {
+            glium::uniforms::UniformValue::Mat4(
+                std::mem::transmute::<Self, [[f32; 4]; 4]>(self.transpose()))
+        }
     }
 }
 

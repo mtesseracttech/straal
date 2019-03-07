@@ -287,7 +287,10 @@ impl fmt::Display for Mat3 {
 
 impl glium::uniforms::AsUniformValue for Mat3 {
     fn as_uniform_value(&self) -> glium::uniforms::UniformValue {
-        unsafe { glium::uniforms::UniformValue::Mat3(std::mem::transmute::<Self, [[f32; 3]; 3]>(self.transpose())) }
+        unsafe {
+            glium::uniforms::UniformValue::Mat3(
+                std::mem::transmute::<Self, [[f32; 3]; 3]>(self.transpose()))
+        }
     }
 }
 

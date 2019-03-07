@@ -1,5 +1,7 @@
 extern crate rand;
 
+use std::time::{Duration, SystemTime};
+
 use rand::Rng;
 
 use straal::*;
@@ -66,8 +68,8 @@ pub fn get_perspective_matrix(target_dims: &Vec2) -> Mat4 {
 
     Mat4::new(f * aspect_ratio, 0.0, 0.0, 0.0,
               0.0, f, 0.0, 0.0,
-              0.0, 0.0, (z_far + z_near) / (z_far - z_near), 1.0,
-              0.0, 0.0, -(2.0 * z_far * z_near) / (z_far - z_near), 0.0)
+              0.0, 0.0, (z_far + z_near) / (z_far - z_near), -(2.0 * z_far * z_near) / (z_far - z_near),
+              0.0, 0.0, 1.0, 0.0)
 }
 
 
@@ -81,4 +83,21 @@ pub fn get_view_matrix(pos: &Vec3, dir: &Vec3, up: &Vec3) -> Mat4 {
                          Vec4::from((up, pos.y)),
                          Vec4::from((fwd, pos.z)),
                          Vec4::new(0.0, 0.0, 0.0, 1.0))
+}
+
+pub fn get_model_matrix(pos: &Vec3) -> Mat4 {
+    Mat4::new(1.0, 0.0, 0.0, pos.x,
+              0.0, 1.0, 0.0, pos.y,
+              0.0, 0.0, 1.0, pos.z,
+              0.0, 0.0, 0.0, 1.0)
+}
+
+pub fn get_time(timer: &SystemTime) -> f32 {
+    match timer.elapsed() {
+        Ok(elapsed) => ((elapsed.as_secs() * 1_000_000_000 + elapsed.subsec_nanos() as u64) as f64 / 1_000_000_000.0) as f32,
+        Err(e) => {
+            println!("Error: {:?}", e);
+            0.0
+        }
+    }
 }

@@ -24,6 +24,13 @@ impl Shader {
         geometry: None,
     };
 
+    #[allow(dead_code)]
+    pub const COLORED2D: Self = Self {
+        vertex: include_str!("res/colored2d/colored2d.vert"),
+        fragment: include_str!("res/colored2d/colored2d.frag"),
+        geometry: None,
+    };
+
 
     #[allow(dead_code)]
     pub fn load(display: &glium::Display, shader_type: Self) -> Option<glium::Program> {
