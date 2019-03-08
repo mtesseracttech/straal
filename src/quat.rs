@@ -82,12 +82,10 @@ impl Quat {
     }
 
     pub fn to_euler_rad_zxy(&self) -> Vec3 {
-        const HALF_PI: f32 = std::f32::consts::PI / 2.0;
-
         let sine_pitch = 2.0 * (self.w * self.x + self.y * self.z);
         if sine_pitch.abs() > 0.9999 {
             println!("using the sp abs line");
-            let x = HALF_PI * sine_pitch;
+            let x = std::f32::consts::FRAC_PI_2 * sine_pitch;
             let y = 0.0;
             let z = (self.x * self.z + self.w * self.y).atan2(0.5 - self.y * self.y - self.z * self.z);
             Vec3 { x, y, z }
@@ -98,6 +96,9 @@ impl Quat {
             Vec3 { x, y, z }
         }
     }
+
+    //TODO: SLERP
+    pub fn slerp(&self, other: Quat) -> Quat { unimplemented!() }
 }
 
 impl Not for Quat {

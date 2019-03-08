@@ -164,6 +164,10 @@ impl Mat4 {
                   self[0][3], self[1][3], self[2][3], self[3][3])
     }
 
+    pub fn rotate_around(&mut self, n: Vec3, theta: Real) {
+        *self *= Self::get_angle_axis(n, theta);
+    }
+
     //Performs a rotation around the cardinal axes, in the order ZXY (handy for camera rotation)
     pub fn angles_to_axes_zxy(angles: Vec3) -> Mat4 {
         Self::from(Mat3::angles_to_axes_zxy(angles))
@@ -258,39 +262,7 @@ impl From<[[Real; 4]; 4]> for Mat4 {
 
 impl From<Quat> for Mat4 {
     fn from(q: Quat) -> Self {
-        let a2 = q.w * q.w;
-        let b2 = q.x * q.x;
-        let c2 = q.y * q.y;
-        let d2 = q.z * q.z;
-
-        let inv = 1.0 / (a2 + b2 + c2 + d2);
-
-        let r0c0 = (a2 + b2 - c2 - d2) * inv;
-        let r1c1 = (a2 - b2 + c2 - d2) * inv;
-        let r2c2 = (a2 - b2 - c2 + d2) * inv;
-
-        let t0 = q.x * q.y;
-        let t1 = q.z * q.w;
-
-        let r1c0 = 2.0 * (t0 + t1) * inv;
-        let r0c1 = 2.0 * (t0 - t1) * inv;
-
-        let t0 = q.x * q.z;
-        let t1 = q.y * q.w;
-
-        let r2c0 = 2.0 * (t0 - t1) * inv;
-        let r0c2 = 2.0 * (t0 + t1) * inv;
-
-        let t0 = q.y * q.z;
-        let t1 = q.x * q.w;
-
-        let r2c1 = 2.0 * (t0 + t1) * inv;
-        let r1c2 = 2.0 * (t0 - t1) * inv;
-
-        Self::new(r0c0, r0c1, r0c2, 0.0,
-                  r1c0, r1c1, r1c2, 0.0,
-                  r2c0, r2c1, r2c2, 0.0,
-                  0.0, 0.0, 0.0, 1.0)
+        Self::from(Mat3::from(q))
     }
 }
 
