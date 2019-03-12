@@ -84,7 +84,6 @@ impl Quat {
     pub fn to_euler_rad_zxy(&self) -> Vec3 {
         let sine_pitch = 2.0 * (self.w * self.x + self.y * self.z);
         if sine_pitch.abs() > 0.9999 {
-            println!("using the sp abs line");
             let x = std::f32::consts::FRAC_PI_2 * sine_pitch;
             let y = 0.0;
             let z = (self.x * self.z + self.w * self.y).atan2(0.5 - self.y * self.y - self.z * self.z);

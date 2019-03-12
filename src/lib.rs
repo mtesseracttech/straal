@@ -1,10 +1,3 @@
-#![allow(dead_code)]
-
-#[macro_use]
-extern crate glium;
-
-pub use glium::*;
-
 pub use ivec2::*;
 pub use ivec3::*;
 pub use ivec4::*;
@@ -42,7 +35,6 @@ impl ApproxEqual for Real {
         let abs_b = rhs.abs();
         let diff = (self - rhs).abs();
 
-        // shortcut, handles infinities
         if self == rhs {
             true
         } else if self == 0.0 || rhs == 0.0 || diff < std::f32::MIN_POSITIVE {
@@ -50,7 +42,7 @@ impl ApproxEqual for Real {
             // relative error is less meaningful here
             //diff < (epsilon * std::f32::MIN_POSITIVE) //idk about this bit, it's waaay too small, even with a relatively big epsilon
             diff < epsilon
-        } else { // use relative error
+        } else {
             diff / f32::min((abs_a + abs_b), std::f32::MAX) < epsilon
         }
     }
