@@ -157,6 +157,7 @@ impl Mat4 {
         adj / det
     }
 
+    //Transposes the matrix (swaps the elements over the diagonal)
     pub fn transpose(&self) -> Self {
         Self::new(self[0][0], self[1][0], self[2][0], self[3][0],
                   self[0][1], self[1][1], self[2][1], self[3][1],
@@ -164,20 +165,35 @@ impl Mat4 {
                   self[0][3], self[1][3], self[2][3], self[3][3])
     }
 
+    //Rotates the matrix around an arbitrary axis
     pub fn rotate_around(&mut self, n: Vec3, theta: Real) {
         *self *= Self::get_angle_axis(n, theta);
     }
 
     //Performs a rotation around the cardinal axes, in the order ZXY (handy for camera rotation)
-    pub fn angles_to_axes_zxy(angles: Vec3) -> Mat4 {
-        Self::from(Mat3::angles_to_axes_zxy(angles))
+    //pub fn angles_to_axes_zxy(angles: Vec3) -> Mat4 {
+    //    Self::from(Mat3::angles_to_axes_zxy(angles))
+    //}
+
+    pub fn get_rotation_mat_euler_zxy() -> Mat4 {
+        Self::from(Mat3::get_rotation_mat_euler_zxy(angles))
     }
 
     pub fn get_angle_axis(n: Vec3, theta: Real) -> Mat4 {
         Self::from(Mat3::get_angle_axis(n, theta))
     }
 
-    pub fn transform(pos: &Vec3) {}
+    pub fn get_translation_mat(trans: &Vec3) -> Mat4 {
+        let mut t_mat = Self::identity();
+        t_mat[3][0] = trans.x;
+        t_mat[3][1] = trans.y;
+        t_mat[3][2] = trans.z;
+        t_mat
+    }
+
+    pub fn translate(&mut self, trans: &Vec3) {
+        *self *= Self::get_translation_mat(trans);
+    }
 
 
     pub fn get_scale_mat(factors: Vec3) -> Mat4 {

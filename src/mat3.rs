@@ -67,7 +67,7 @@ impl Mat3 {
     }
 
     //Performs a rotation around the cardinal axes, in the order ZXY (handy for camera rotation)
-    pub fn angles_to_axes_zxy(angles: Vec3) -> Mat3 {
+    pub fn get_rotation_mat_euler_zxy(angles: Vec3) -> Mat3 {
         const DEG_TO_RAD: f32 = std::f32::consts::PI / 180.0;
         let angles = angles * DEG_TO_RAD;
         let sx = angles.x.sin();
