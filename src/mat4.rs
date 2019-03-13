@@ -183,7 +183,7 @@ impl Mat4 {
         Self::from(Mat3::get_angle_axis(n, theta))
     }
 
-    pub fn get_translation_mat(trans: &Vec3) -> Mat4 {
+    pub fn get_translation_mat(trans: Vec3) -> Mat4 {
         let mut t_mat = Self::identity();
         t_mat[3][0] = trans.x;
         t_mat[3][1] = trans.y;
@@ -191,7 +191,7 @@ impl Mat4 {
         t_mat
     }
 
-    pub fn translate(&mut self, trans: &Vec3) {
+    pub fn translate(&mut self, trans: Vec3) {
         *self *= Self::get_translation_mat(trans);
     }
 
