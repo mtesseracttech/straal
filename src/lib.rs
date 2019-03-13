@@ -43,7 +43,7 @@ impl ApproxEqual for Real {
             //diff < (epsilon * std::f32::MIN_POSITIVE) //idk about this bit, it's waaay too small, even with a relatively big epsilon
             diff < epsilon
         } else {
-            diff / f32::min((abs_a + abs_b), std::f32::MAX) < epsilon
+            diff / f32::min(abs_a + abs_b, std::f32::MAX) < epsilon
         }
     }
 }

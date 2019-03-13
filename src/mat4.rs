@@ -175,7 +175,7 @@ impl Mat4 {
     //    Self::from(Mat3::angles_to_axes_zxy(angles))
     //}
 
-    pub fn get_rotation_mat_euler_zxy() -> Mat4 {
+    pub fn get_rotation_mat_euler_zxy(angles: Vec3) -> Mat4 {
         Self::from(Mat3::get_rotation_mat_euler_zxy(angles))
     }
 

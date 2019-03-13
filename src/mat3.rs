@@ -83,27 +83,25 @@ impl Mat3 {
     }
 
     pub fn get_euler_angles(&self) -> Vec3 {
-        let mut x = 0.0;
-        let mut y = 0.0;
-        let mut z = 0.0;
+        let mut angles = Vec3::zero();
 
         let sp = -self[3][2];
         if sp <= -1.0 {
-            x = -std::f32::consts::FRAC_PI_2
+            angles.x = -std::f32::consts::FRAC_PI_2
         } else if sp >= 1.0 {
-            x = std::f32::consts::FRAC_PI_2
+            angles.x = std::f32::consts::FRAC_PI_2
         } else {
-            x = sp.asin()
+            angles.x = sp.asin()
         }
 
         if sp.abs() > 0.9999 {
-            y = -self[3][1].atan2(self[1][1]);
-            z = 0.0;
+            angles.y = -self[3][1].atan2(self[1][1]);
+            angles.z = 0.0;
         } else {
-            y = self[1][3].atan2(self[3][3]);
-            z = self[2][1].atan2(self[2][2]);
+            angles.y = self[1][3].atan2(self[3][3]);
+            angles.z = self[2][1].atan2(self[2][2]);
         }
-        Vec3::new(x, y, z)
+        angles
     }
 
     //Performs a rotation around an arbitary unit axis
