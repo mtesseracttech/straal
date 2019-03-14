@@ -85,7 +85,7 @@ impl Mat3 {
     pub fn get_euler_angles(&self) -> Vec3 {
         let mut angles = Vec3::zero();
 
-        let sp = -self[3][2];
+        let sp = -self[2][1];
         if sp <= -1.0 {
             angles.x = -std::f32::consts::FRAC_PI_2
         } else if sp >= 1.0 {
@@ -95,11 +95,11 @@ impl Mat3 {
         }
 
         if sp.abs() > 0.9999 {
-            angles.y = -self[3][1].atan2(self[1][1]);
+            angles.y = -self[2][0].atan2(self[0][0]);
             angles.z = 0.0;
         } else {
-            angles.y = self[1][3].atan2(self[3][3]);
-            angles.z = self[2][1].atan2(self[2][2]);
+            angles.y = self[0][2].atan2(self[2][2]);
+            angles.z = self[1][0].atan2(self[1][1]);
         }
         angles
     }
