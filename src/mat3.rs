@@ -95,11 +95,11 @@ impl Mat3 {
         }
 
         if sp.abs() > 0.9999 {
-            angles.y = -self[2][0].atan2(self[0][0]);
+            angles.y = -self[0][2].atan2(self[0][0]);
             angles.z = 0.0;
         } else {
             angles.y = self[0][2].atan2(self[2][2]);
-            angles.z = self[1][0].atan2(self[1][1]);
+            angles.z = self[0][1].atan2(self[1][1]);
         }
         angles
     }
