@@ -303,7 +303,7 @@ impl IndexMut<usize> for Mat4 {
             0 => &mut self.r0,
             1 => &mut self.r1,
             2 => &mut self.r2,
-            3 => &mut self.r2,
+            3 => &mut self.r3,
             _ => panic!("Requested an invalid row of a Mat4: {}", index)
         }
     }
