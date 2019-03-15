@@ -37,7 +37,7 @@ impl Vec4 {
     }
 
     pub fn is_unit(&self) -> bool {
-        self.length_squared() == 1.0
+        self.length_squared().approx_eq(1.0, DEF_F32_EPSILON)
     }
 
 

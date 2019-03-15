@@ -1,5 +1,9 @@
+use std::borrow::Cow;
 use std::fmt;
 use std::ops::*;
+
+use glium::CapabilitiesSource;
+use glium::vertex::AttributeType;
 
 use super::*;
 
@@ -40,7 +44,7 @@ impl Vec2 {
     }
 
     pub fn is_unit(&self) -> bool {
-        self.length_squared() == 1.0
+        self.length_squared().approx_eq(1.0, DEF_F32_EPSILON)
     }
 
     pub fn size() -> usize {
