@@ -46,11 +46,15 @@ impl Quat {
     }
 
     pub fn is_pure(&self) -> bool {
-        self.w == 0.0
+        self.w.approx_eq(0.0, DEF_F32_EPSILON)
+    }
+
+    pub fn is_unit(&self) -> bool {
+        self.length_squared().approx_eq(1.0, DEF_F32_EPSILON)
     }
 
     pub fn is_pure_unit(&self) -> bool {
-        self.is_pure() && self.length_squared() == 1.0
+        self.is_pure() && self.is_unit()
     }
 
     pub fn from_euler_deg_zxy(angles: Vec3) -> Quat {
@@ -172,5 +176,70 @@ impl From<(Real, Real, Real, Real)> for Quat {
 impl From<[Real; 4]> for Quat {
     fn from(arr: [Real; 4]) -> Self {
         Self::new(arr[0], arr[1], arr[2], arr[3])
+    }
+}
+
+impl From<Mat3> for Quat {
+    fn from(m: Mat3) -> Self {
+        let four_w_sq_m_1 = m[0][0] + m[1][1] + m[2][2];
+        let four_x_sq_m_1 = m[0][0] - m[1][1] - m[2][2];
+        let four_y_sq_m_1 = -m[0][0] + m[1][1] - m[2][2];
+        let four_z_sq_m_1 = -m[0][0] - m[1][1] + m[2][2];
+
+        let mut biggest_index = 0;
+        let mut four_biggest_sq_m_1 = four_w_sq_m_1;
+        if four_x_sq_m_1 > four_biggest_sq_m_1 {
+            four_biggest_sq_m_1 = four_x_sq_m_1;
+            biggest_index = 1;
+        }
+        if four_y_sq_m_1 > four_biggest_sq_m_1 {
+            four_biggest_sq_m_1 = four_y_sq_m_1;
+            biggest_index = 2;
+        }
+        if four_z_sq_m_1 > four_biggest_sq_m_1 {
+            four_biggest_sq_m_1 = four_z_sq_m_1;
+            biggest_index = 3;
+        }
+
+        let biggest_val = (four_biggest_sq_m_1 + 1.0).sqrt() * 0.5;
+        let mult = 0.25 / biggest_val;
+
+        match biggest_index {
+            0 => {
+                Quat {
+                    w: biggest_val,
+                    x: (m[1][2] - m[2][1]) * mult,
+                    y: (m[2][0] - m[0][2]) * mult,
+                    z: (m[0][1] - m[1][0]) * mult,
+                }
+            }
+            1 => {
+                Quat {
+                    w: (m[1][2] - m[2][1]) * mult,
+                    x: biggest_val,
+                    y: (m[0][1] + m[1][0]) * mult,
+                    z: (m[2][0] + m[0][2]) * mult,
+                }
+            }
+            2 => {
+                Quat {
+                    w: (m[2][0] - m[0][2]) * mult,
+                    x: (m[0][1] + m[1][0]) * mult,
+                    y: biggest_val,
+                    z: (m[2][1] + m[1][2]) * mult,
+                }
+            }
+            3 => {
+                Quat {
+                    w: (m[0][1] - m[1][0] * mult),
+                    x: (m[2][0] + m[0][2] * mult),
+                    y: (m[1][2] + m[2][1] * mult),
+                    z: biggest_val,
+                }
+            }
+            _ => {
+                Quat::identity()
+            }
+        }
     }
 }
