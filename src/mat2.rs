@@ -160,6 +160,12 @@ impl fmt::Display for Mat2 {
     }
 }
 
+impl Default for Mat2 {
+    fn default() -> Self {
+        Mat2::identity()
+    }
+}
+
 impl glium::uniforms::AsUniformValue for Mat2 {
     fn as_uniform_value(&self) -> glium::uniforms::UniformValue {
         unsafe {

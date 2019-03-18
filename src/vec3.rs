@@ -227,9 +227,14 @@ impl From<(Vec2, Real)> for Vec3 {
     }
 }
 
-
 impl From<Vec4> for Vec3 {
     fn from(vec4: Vec4) -> Self { Self::new(vec4.x, vec4.y, vec4.z) }
+}
+
+impl Default for Vec3 {
+    fn default() -> Self {
+        Vec3::zero()
+    }
 }
 
 impl glium::uniforms::AsUniformValue for Vec3 {

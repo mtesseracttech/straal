@@ -146,10 +146,10 @@ impl Mat3 {
     }
 
     pub fn scale(&mut self, factors: Vec3) {
-        *self *= Self::get_scale(factors);
+        *self *= Self::get_scale_mat(factors);
     }
 
-    pub fn get_scale(factors: Vec3) -> Mat3 {
+    pub fn get_scale_mat(factors: Vec3) -> Mat3 {
         Self::new(factors.x, 0.0, 0.0,
                   0.0, factors.y, 0.0,
                   0.0, 0.0, factors.z)
@@ -284,6 +284,12 @@ impl fmt::Display for Mat3 {
                self.r0.x, self.r0.y, self.r0.z,
                self.r1.x, self.r1.y, self.r1.z,
                self.r2.x, self.r2.y, self.r2.z)
+    }
+}
+
+impl Default for Mat3 {
+    fn default() -> Self {
+        Mat3::identity()
     }
 }
 

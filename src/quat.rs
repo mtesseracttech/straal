@@ -18,7 +18,12 @@ impl Quat {
     }
 
     pub fn identity() -> Quat {
-        Self::new(1.0, 0.0, 0.0, 0.0)
+        Quat {
+            w: 1.0,
+            x: 0.0,
+            y: 0.0,
+            z: 0.0,
+        }
     }
 
     pub fn dot(lhs: &Quat, rhs: &Quat) -> Real {
@@ -55,6 +60,28 @@ impl Quat {
 
     pub fn is_pure_unit(&self) -> bool {
         self.is_pure() && self.is_unit()
+    }
+
+    
+    pub fn pow(&self, exponent: Real) -> Quat {
+        if self.w.abs() < 0.9999 {
+            let alpha = self.w.acos();
+            let new_alpha = alpha * exponent;
+            let scalar = new_alpha.sin() / alpha.sin();
+            Quat {
+                w: new_alpha.cos(),
+                x: self.x * scalar,
+                y: self.y * scalar,
+                z: self.z * scalar,
+            }
+        } else {
+            Quat {
+                w: self.w,
+                x: self.x,
+                y: self.y,
+                z: self.z,
+            }
+        }
     }
 
     //Performs a rotation around the cardinal axes, in the order BPH (handy for camera rotation)
@@ -152,8 +179,41 @@ impl Quat {
     }
 
 
-    //TODO: SLERP
-    pub fn slerp(&self, other: Quat) -> Quat { unimplemented!() }
+    pub fn slerp(&self, other: Quat, t: Real) -> Quat {
+        let mut cos_omega = Self::dot(self, &other);
+
+        let q0 = *self;
+        let mut q1 = other;
+
+        if cos_omega < 0.0 {
+            q1 = -q1;
+            cos_omega = -cos_omega;
+        }
+
+        let mut k0 = 0.0;
+        let mut k1 = 0.0;
+
+        if cos_omega > 0.9999 {
+            k0 = 1.0 - t;
+            k1 = t;
+        } else {
+            let sin_omega = (1.0 - cos_omega * cos_omega).sqrt();
+
+            let omega = sin_omega.atan2(cos_omega);
+
+            let one_over_sin_omega = 1.0 / sin_omega;
+
+            k0 = ((1.0 - t) * omega).sin() * one_over_sin_omega;
+            k1 = (t * omega).sin() * one_over_sin_omega;
+        }
+
+        Quat {
+            w: q0.w * k0 + q1.w * k1,
+            x: q0.x * k0 + q1.x * k1,
+            y: q0.y * k0 + q1.y * k1,
+            z: q0.z * k0 + q1.z * k1,
+        }
+    }
 }
 
 impl Not for Quat {
@@ -161,6 +221,19 @@ impl Not for Quat {
 
     fn not(self) -> Self::Output {
         self.inverse()
+    }
+}
+
+impl Neg for Quat {
+    type Output = Quat;
+
+    fn neg(self) -> Self::Output {
+        Quat {
+            w: -self.w,
+            x: -self.x,
+            y: -self.y,
+            z: -self.z,
+        }
     }
 }
 
@@ -293,5 +366,11 @@ impl From<Mat3> for Quat {
                 Quat::identity()
             }
         }
+    }
+}
+
+impl Default for Quat {
+    fn default() -> Self {
+        Quat::identity()
     }
 }

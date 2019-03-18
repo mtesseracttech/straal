@@ -290,6 +290,12 @@ impl From<(Real, Vec2, Real)> for Vec4 {
     }
 }
 
+impl Default for Vec4 {
+    fn default() -> Self {
+        Vec4::zero()
+    }
+}
+
 impl glium::uniforms::AsUniformValue for Vec4 {
     fn as_uniform_value(&self) -> glium::uniforms::UniformValue {
         unsafe {

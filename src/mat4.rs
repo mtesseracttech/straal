@@ -204,7 +204,7 @@ impl Mat4 {
 
 
     pub fn get_scale_mat(factors: Vec3) -> Mat4 {
-        Self::from(Mat3::get_scale(factors))
+        Self::from(Mat3::get_scale_mat(factors))
     }
 
     pub fn get_scale_along_axis_mat(n: Vec3, s: Real) -> Mat4 {
@@ -353,6 +353,12 @@ impl From<Mat3> for Mat4 {
     }
 }
 
+impl Default for Mat4 {
+    fn default() -> Self {
+        Mat4::identity()
+    }
+}
+
 impl glium::uniforms::AsUniformValue for Mat4 {
     fn as_uniform_value(&self) -> glium::uniforms::UniformValue {
         unsafe {
@@ -371,3 +377,4 @@ unsafe impl glium::vertex::Attribute for Mat4 {
         true
     }
 }
+

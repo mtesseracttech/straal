@@ -217,6 +217,12 @@ impl From<Vec4> for Vec2 {
     fn from(vec4: Vec4) -> Self { Self::new(vec4.x, vec4.y) }
 }
 
+impl Default for Vec2 {
+    fn default() -> Self {
+        Vec2::zero()
+    }
+}
+
 impl glium::uniforms::AsUniformValue for Vec2 {
     fn as_uniform_value(&self) -> glium::uniforms::UniformValue {
         unsafe { glium::uniforms::UniformValue::Vec2(std::mem::transmute::<Self, [f32; 2]>(*self)) }

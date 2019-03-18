@@ -15,6 +15,13 @@ impl IVec2 {
         IVec2 { x, y }
     }
 
+    pub fn zero() -> IVec2 {
+        IVec2 {
+            x: 0,
+            y: 0,
+        }
+    }
+
     pub fn dot(lhs: &IVec2, rhs: &IVec2) -> Integer {
         lhs.x * rhs.x + lhs.y * rhs.y
     }
@@ -166,6 +173,12 @@ impl From<IVec4> for IVec2 {
     fn from(vec4: IVec4) -> Self {
         Self::new(vec4.x,
                   vec4.y)
+    }
+}
+
+impl Default for IVec2 {
+    fn default() -> Self {
+        IVec2::zero()
     }
 }
 
