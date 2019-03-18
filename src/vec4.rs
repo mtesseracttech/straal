@@ -19,13 +19,20 @@ impl Vec4 {
     }
 
     pub fn zero() -> Vec4 {
-        Self::new(0.0, 0.0, 0.0, 0.0)
+        Vec4 { x: 0.0, y: 0.0, z: 0.0, w: 0.0 }
+    }
+
+    pub fn one() -> Vec4 {
+        Vec4 { x: 1.0, y: 1.0, z: 1.0, w: 1.0 }
+    }
+
+    pub fn all(t: Real) -> Vec4 {
+        Vec4 { x: t, y: t, z: t, w: t }
     }
 
     pub fn dot(lhs: &Vec4, rhs: &Vec4) -> Real {
         lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z + lhs.w * rhs.w
     }
-
 
     pub fn length_squared(&self) -> Real {
         Vec4::dot(self, self)

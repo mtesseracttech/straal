@@ -18,13 +18,17 @@ impl IVec4 {
     }
 
     pub fn zero() -> IVec4 {
-        IVec4 {
-            x: 0,
-            y: 0,
-            z: 0,
-            w: 0,
-        }
+        IVec4 { x: 0, y: 0, z: 0, w: 0 }
     }
+
+    pub fn one() -> IVec4 {
+        IVec4 { x: 1, y: 1, z: 1, w: 1 }
+    }
+
+    pub fn all(t: Integer) -> IVec4 {
+        IVec4 { x: t, y: t, z: t, w: t }
+    }
+
 
     pub fn dot(lhs: &IVec4, rhs: &IVec4) -> Integer {
         lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z + lhs.w * rhs.w

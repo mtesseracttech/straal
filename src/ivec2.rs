@@ -16,10 +16,14 @@ impl IVec2 {
     }
 
     pub fn zero() -> IVec2 {
-        IVec2 {
-            x: 0,
-            y: 0,
-        }
+        IVec2 { x: 0, y: 0 }
+    }
+    pub fn one() -> IVec2 {
+        IVec2 { x: 1, y: 1 }
+    }
+
+    pub fn all(t: Integer) -> IVec2 {
+        IVec2 { x: t, y: t }
     }
 
     pub fn dot(lhs: &IVec2, rhs: &IVec2) -> Integer {

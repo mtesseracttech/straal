@@ -20,7 +20,15 @@ impl Vec2 {
     }
 
     pub fn zero() -> Vec2 {
-        Self::new(0.0, 0.0)
+        Vec2 { x: 0.0, y: 0.0 }
+    }
+
+    pub fn one() -> Vec2 {
+        Vec2 { x: 1.0, y: 1.0 }
+    }
+
+    pub fn all(t: Real) -> Vec2 {
+        Vec2 { x: t, y: t }
     }
 
     pub fn right() -> Vec2 {

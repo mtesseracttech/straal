@@ -62,7 +62,7 @@ impl Quat {
         self.is_pure() && self.is_unit()
     }
 
-    
+
     pub fn pow(&self, exponent: Real) -> Quat {
         if self.w.abs() < 0.9999 {
             let alpha = self.w.acos();

@@ -17,7 +17,15 @@ impl Vec3 {
     }
 
     pub fn zero() -> Vec3 {
-        Self::new(0.0, 0.0, 0.0)
+        Vec3 { x: 0.0, y: 0.0, z: 0.0 }
+    }
+
+    pub fn one() -> Vec3 {
+        Vec3 { x: 1.0, y: 1.0, z: 1.0 }
+    }
+
+    pub fn all(t: Real) -> Vec3 {
+        Vec3 { x: t, y: t, z: t }
     }
 
     pub fn up() -> Vec3 {
