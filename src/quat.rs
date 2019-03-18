@@ -57,48 +57,100 @@ impl Quat {
         self.is_pure() && self.is_unit()
     }
 
-    pub fn from_euler_deg_zxy(angles: Vec3) -> Quat {
-        const DEG_TO_RAD: f32 = std::f32::consts::PI / 180.0;
-        Self::from_euler_rad_zxy(angles * DEG_TO_RAD)
-    }
+    //Performs a rotation around the cardinal axes, in the order BPH (handy for camera rotation)
+    pub fn from_euler_obj_upr_rad(pitch: Real, heading: Real, bank: Real) -> Quat {
+        let pitch = pitch / 2.0;
+        let heading = heading / 2.0;
+        let bank = bank / 2.0;
 
+        let sp = pitch.sin();
+        let cp = pitch.cos();
+        let sh = heading.sin();
+        let ch = heading.cos();
+        let sb = bank.sin();
+        let cb = bank.cos();
 
-    //Euler angles to rad in zxy order
-    pub fn from_euler_rad_zxy(angles: Vec3) -> Quat {
-        let angles = angles / 2.0;
-
-        let cx = angles.x.cos();
-        let sx = angles.x.sin();
-        let cy = angles.y.cos();
-        let sy = angles.y.sin();
-        let cz = angles.z.cos();
-        let sz = angles.z.sin();
-
-        Self::new(cz * cx * cy - sz * sx * sy,
-                  cz * sx * cy - sz * cx * sy,
-                  cz * cx * sy + sz * sx * cy,
-                  cz * sx * sy + sz * cx * cy)
-    }
-
-    pub fn to_euler_deg_zxy(&self) -> Vec3 {
-        const RAD_TO_DEG: f32 = 180.0 / std::f32::consts::PI;
-        self.to_euler_rad_zxy() * RAD_TO_DEG
-    }
-
-    pub fn to_euler_rad_zxy(&self) -> Vec3 {
-        let sine_pitch = 2.0 * (self.w * self.x + self.y * self.z);
-        if sine_pitch.abs() > 0.9999 {
-            let x = std::f32::consts::FRAC_PI_2 * sine_pitch;
-            let y = 0.0;
-            let z = (self.x * self.z + self.w * self.y).atan2(0.5 - self.y * self.y - self.z * self.z);
-            Vec3 { x, y, z }
-        } else {
-            let x = sine_pitch.asin();
-            let y = (-self.x * self.z + self.w * self.y).atan2(0.5 - self.x * self.x - self.y * self.y);
-            let z = (-self.x * self.y + self.z * self.w).atan2(0.5 - self.x * self.x - self.z * self.z);
-            Vec3 { x, y, z }
+        Quat {
+            w: ch * cp * cb + sh * sp * sb,
+            x: ch * sp * cb + sh * cp * sb,
+            y: sh * cp * cb - ch * sp * sb,
+            z: ch * cp * sb - sh * sp * cb,
         }
     }
+
+    pub fn from_euler_obj_upr_deg(pitch: Real, heading: Real, bank: Real) -> Quat {
+        Self::from_euler_obj_upr_rad(pitch.to_radians(), heading.to_radians(), bank.to_radians())
+    }
+
+    //Performs a rotation around the cardinal axes, in the order BPH (handy for camera rotation)
+    pub fn from_euler_upr_obj_rad(pitch: Real, heading: Real, bank: Real) -> Quat {
+        let pitch = pitch / 2.0;
+        let heading = heading / 2.0;
+        let bank = bank / 2.0;
+
+        let sp = pitch.sin();
+        let cp = pitch.cos();
+        let sh = heading.sin();
+        let ch = heading.cos();
+        let sb = bank.sin();
+        let cb = bank.cos();
+
+        Quat {
+            w: ch * cp * cb + sh * sp * sb,
+            x: -ch * sp * cb - sh * cp * sb,
+            y: ch * sp * sb - sh * cp * cb,
+            z: sh * sp * cb - ch * cp * sb,
+        }
+    }
+
+    pub fn from_euler_upr_obj_deg(pitch: Real, heading: Real, bank: Real) -> Quat {
+        Self::from_euler_upr_obj_rad(pitch.to_radians(), heading.to_radians(), bank.to_radians())
+    }
+
+    pub fn get_euler_angles_obj_upr_rad(&self) -> Vec3 {
+        let sin_pitch = -2.0 * (self.y * self.z - self.w * self.x);
+
+        if sin_pitch.abs() > 0.9999 {
+            Vec3 {
+                x: std::f32::consts::FRAC_PI_2 * sin_pitch,
+                y: (-self.x * self.z + self.w * self.y).atan2(0.5 - self.y * self.y - self.z * self.z),
+                z: 0.0,
+            }
+        } else {
+            Vec3 {
+                x: sin_pitch.asin(),
+                y: (self.x * self.z + self.w * self.y).atan2(0.5 - self.x * self.x - self.y * self.y),
+                z: (self.x * self.y + self.w * self.z).atan2(0.5 - self.x * self.x - self.z * self.z),
+            }
+        }
+    }
+
+    pub fn get_euler_angles_obj_upr_deg(&self) -> Vec3 {
+        self.get_euler_angles_obj_upr_rad() * f32::to_degrees(1.0)
+    }
+
+    pub fn get_euler_angles_upr_obj_rad(&self) -> Vec3 {
+        let sin_pitch = -2.0 * (self.y * self.z + self.w * self.x);
+
+        if sin_pitch.abs() > 0.9999 {
+            Vec3 {
+                x: std::f32::consts::FRAC_PI_2 * sin_pitch,
+                y: (-self.x * self.z - self.w * self.y).atan2(0.5 - self.y * self.y - self.z * self.z),
+                z: 0.0,
+            }
+        } else {
+            Vec3 {
+                x: sin_pitch.asin(),
+                y: (self.x * self.z - self.w * self.y).atan2(0.5 - self.x * self.x - self.y * self.y),
+                z: (self.x * self.y - self.w * self.z).atan2(0.5 - self.x * self.x - self.z * self.z),
+            }
+        }
+    }
+
+    pub fn get_euler_angles_upr_obj_deg(&self) -> Vec3 {
+        self.get_euler_angles_upr_obj_rad() * f32::to_degrees(1.0)
+    }
+
 
     //TODO: SLERP
     pub fn slerp(&self, other: Quat) -> Quat { unimplemented!() }

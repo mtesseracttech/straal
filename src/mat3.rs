@@ -66,42 +66,71 @@ impl Mat3 {
                   self[0][2], self[1][2], self[2][2])
     }
 
-    //Performs a rotation around the cardinal axes, in the order ZXY (handy for camera rotation)
-    pub fn get_rotation_mat_euler_zxy(angles: Vec3) -> Mat3 {
-        const DEG_TO_RAD: f32 = std::f32::consts::PI / 180.0;
-        let angles = angles * DEG_TO_RAD;
-        let sx = angles.x.sin();
-        let cx = angles.x.cos();
-        let sy = angles.y.sin();
-        let cy = angles.y.cos();
-        let sz = angles.z.sin();
-        let cz = angles.z.cos();
 
-        Self::new(sx * sy * sz + cy * cz, cx * sz, sx * cy * sz - sy * cz,
-                  sx * sy * cz - cy * sz, cx * cz, sy * sz + sx * cy * cz,
-                  cx * sy, -sx, cx * cy)
+    //Performs a rotation around the cardinal axes, in the order BPH (handy for camera rotation)
+    pub fn get_rotation_mat_euler_upr_obj_rad(pitch: Real, heading: Real, bank: Real) -> Mat3 {
+        let sp = pitch.sin();
+        let cp = pitch.cos();
+        let sh = heading.sin();
+        let ch = heading.cos();
+        let sb = bank.sin();
+        let cb = bank.cos();
+
+        Self::new(ch * cb + sh * sp * sb, sb * cp, -sh * cb + ch * sp * sb,
+                  -ch * sb + sh * sp * cb, cb * cp, sb * sh + ch * sp * cb,
+                  sh * cp, -sp, ch * cp)
     }
 
-    pub fn get_euler_angles(&self) -> Vec3 {
+    pub fn get_rotation_mat_euler_upr_obj_deg(pitch: Real, heading: Real, bank: Real) -> Mat3 {
+        Self::get_rotation_mat_euler_upr_obj_rad(pitch.to_radians(), heading.to_radians(), bank.to_radians())
+    }
+
+    //Performs a rotation around the cardinal axes, in the order HPB
+    pub fn get_rotation_mat_euler_obj_upr_rad(pitch: Real, heading: Real, bank: Real) -> Mat3 {
+        let sp = pitch.sin();
+        let cp = pitch.cos();
+        let sh = heading.sin();
+        let ch = heading.cos();
+        let sb = bank.sin();
+        let cb = bank.cos();
+
+        Self::new(ch * cb + sh * sp * sb, -ch * sb + sh * sp * cb, sh * cp,
+                  sb * cp, cb * cp, -sp,
+                  -sh * cb + ch * sp * sb, sb * sh + ch * sp * cb, ch * cp)
+    }
+
+    pub fn get_rotation_mat_euler_obj_upr_deg(pitch: Real, heading: Real, bank: Real) -> Mat3 {
+        Self::get_rotation_mat_euler_obj_upr_rad(pitch.to_radians(), heading.to_radians(), bank.to_radians())
+    }
+
+
+    pub fn get_euler_angles_obj_upr(&self) -> Vec3 {
         let mut angles = Vec3::zero();
 
         let sp = -self[2][1];
-        if sp <= -1.0 {
-            angles.x = -std::f32::consts::FRAC_PI_2
+        let pitch = if sp <= -1.0 {
+            -std::f32::consts::FRAC_PI_2
         } else if sp >= 1.0 {
-            angles.x = std::f32::consts::FRAC_PI_2
+            std::f32::consts::FRAC_PI_2
         } else {
-            angles.x = sp.asin()
-        }
+            sp.asin()
+        };
+
+        let mut bank = 0.0;
+        let mut heading = 0.0;
 
         if sp.abs() > 0.9999 {
-            angles.y = -self[0][2].atan2(self[0][0]);
-            angles.z = 0.0;
+            heading = -self[0][2].atan2(self[0][0]);
+            bank = 0.0;
         } else {
-            angles.y = self[0][2].atan2(self[2][2]);
-            angles.z = self[0][1].atan2(self[1][1]);
+            heading = self[0][2].atan2(self[2][2]);
+            bank = self[0][1].atan2(self[1][1]);
         }
-        angles
+        Vec3 {
+            x: pitch,
+            y: heading,
+            z: bank,
+        }
     }
 
     //Performs a rotation around an arbitary unit axis
@@ -206,39 +235,14 @@ impl From<[[Real; 3]; 3]> for Mat3 {
 
 impl From<Quat> for Mat3 {
     fn from(q: Quat) -> Self {
-        let a2 = q.w * q.w;
-        let b2 = q.x * q.x;
-        let c2 = q.y * q.y;
-        let d2 = q.z * q.z;
+        let w2 = q.w * q.w;
+        let x2 = q.x * q.x;
+        let y2 = q.y * q.y;
+        let z2 = q.z * q.z;
 
-        //Normalizes the quaternion, to be sure
-        let inv = 1.0 / (a2 + b2 + c2 + d2);
-
-        let r0c0 = (a2 + b2 - c2 - d2) * inv;
-        let r1c1 = (a2 - b2 + c2 - d2) * inv;
-        let r2c2 = (a2 - b2 - c2 + d2) * inv;
-
-        let t1 = q.x * q.y;
-        let t2 = q.z * q.w;
-
-        let r1c0 = 2.0 * (t1 + t2) * inv;
-        let r0c1 = 2.0 * (t1 - t2) * inv;
-
-        let t1 = q.x * q.z;
-        let t2 = q.y * q.w;
-
-        let r2c0 = 2.0 * (t1 - t2) * inv;
-        let r0c2 = 2.0 * (t1 + t2) * inv;
-
-        let t1 = q.y * q.z;
-        let t2 = q.x * q.w;
-
-        let r2c1 = 2.0 * (t1 + t2) * inv;
-        let r1c2 = 2.0 * (t1 - t2) * inv;
-
-        Self::new(r0c0, r0c1, r0c2,
-                  r1c0, r1c1, r1c2,
-                  r2c0, r2c1, r2c2)
+        Self::new(1.0 - 2.0 * (y2 - z2), 2.0 * (q.x * q.y + q.w * q.z), 2.0 * (q.x * q.z - q.w * q.y),
+                  2.0 * (q.x * q.y - q.w * q.z), 1.0 - 2.0 * (x2 - z2), 2.0 * (q.y * q.z + q.w * q.x),
+                  2.0 * (q.x * q.z + q.w * q.y), 2.0 * (q.y * q.z - q.w * q.x), 1.0 - 2.0 * (x2 - y2))
     }
 }
 

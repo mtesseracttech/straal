@@ -1,8 +1,4 @@
-extern crate rand;
-
 use std::time::{Duration, SystemTime};
-
-use rand::Rng;
 
 use straal::*;
 

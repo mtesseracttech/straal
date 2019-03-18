@@ -1,15 +1,14 @@
 [package]
 name = "straal"
 version = "0.1.0"
-authors = ["MT <mtesseracttech@gmail.com>"]
+authors = ["MT"]
 edition = "2018"
 
 [dependencies]
 glium = "*"
-#image = "*"
-rand = "*"
-criterion = "*"
 
+[dev-dependencies]
+criterion = "*"
 
 [[bench]]
 name = "matrix_benchmarks"

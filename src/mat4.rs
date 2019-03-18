@@ -170,13 +170,20 @@ impl Mat4 {
         *self *= Self::get_angle_axis(n, theta);
     }
 
-    //Performs a rotation around the cardinal axes, in the order ZXY (handy for camera rotation)
-    //pub fn angles_to_axes_zxy(angles: Vec3) -> Mat4 {
-    //    Self::from(Mat3::angles_to_axes_zxy(angles))
-    //}
+    pub fn get_rotation_mat_euler_upr_obj_rad(pitch: Real, heading: Real, bank: Real) -> Mat4 {
+        Self::from(Mat3::get_rotation_mat_euler_upr_obj_rad(pitch, heading, bank))
+    }
 
-    pub fn get_rotation_mat_euler_zxy(angles: Vec3) -> Mat4 {
-        Self::from(Mat3::get_rotation_mat_euler_zxy(angles))
+    pub fn get_rotation_mat_euler_upr_obj_deg(pitch: Real, heading: Real, bank: Real) -> Mat4 {
+        Self::from(Mat3::get_rotation_mat_euler_upr_obj_deg(pitch, heading, bank))
+    }
+
+    pub fn get_rotation_mat_euler_obj_upr_rad(pitch: Real, heading: Real, bank: Real) -> Mat4 {
+        Self::from(Mat3::get_rotation_mat_euler_obj_upr_rad(pitch, heading, bank))
+    }
+
+    pub fn get_rotation_mat_euler_obj_upr_deg(pitch: Real, heading: Real, bank: Real) -> Mat4 {
+        Self::from(Mat3::get_rotation_mat_euler_obj_upr_deg(pitch, heading, bank))
     }
 
     pub fn get_angle_axis(n: Vec3, theta: Real) -> Mat4 {
