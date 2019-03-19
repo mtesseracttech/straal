@@ -192,9 +192,9 @@ impl Mat4 {
 
     pub fn get_translation_mat(trans: Vec3) -> Mat4 {
         let mut t_mat = Self::identity();
-        t_mat[3][0] = trans.x;
-        t_mat[3][1] = trans.y;
-        t_mat[3][2] = trans.z;
+        t_mat[0][3] = trans.x;
+        t_mat[1][3] = trans.y;
+        t_mat[2][3] = trans.z;
         t_mat
     }
 
