@@ -46,7 +46,7 @@ impl Quat {
     }
 
     pub fn inverse(&self) -> Quat {
-        let inv_fact = 1.0 / Self::dot(self, self);
+        let inv_fact = 1.0 / self.length();
         self.conjugate() * inv_fact
     }
 
@@ -178,6 +178,24 @@ impl Quat {
         self.get_euler_angles_upr_obj_rad() * f32::to_degrees(1.0)
     }
 
+    //Performs a rotation around an arbitary unit axis
+    pub fn angle_axis(n: Vec3, theta: Real) -> Quat {
+        debug_assert!(n.is_unit());
+        let half_theta = theta * 0.5;
+
+        Quat {
+            w: half_theta.cos(),
+            x: n.x * half_theta.sin(),
+            y: n.y * half_theta.sin(),
+            z: n.z * half_theta.sin(),
+        }
+    }
+
+    //Rotates the quaternion around an arbitrary axis
+    pub fn rotate_around(&mut self, n: Vec3, theta: Real) {
+        *self *= Self::angle_axis(n, theta);
+    }
+
 
     pub fn slerp(&self, other: Quat, t: Real) -> Quat {
         let mut cos_omega = Self::dot(self, &other);
@@ -212,6 +230,26 @@ impl Quat {
             x: q0.x * k0 + q1.x * k1,
             y: q0.y * k0 + q1.y * k1,
             z: q0.z * k0 + q1.z * k1,
+        }
+    }
+
+    pub fn lerp(&self, other: Quat, t: Real) -> Quat {
+        let mut cos_omega = Self::dot(self, &other);
+
+        let q0 = *self;
+        let mut q1 = other;
+
+        if cos_omega < 0.0 {
+            q1 = -q1;
+        }
+
+        let one_min_t = 1.0 - t;
+
+        Quat {
+            w: q0.w * one_min_t + q1.w * t,
+            x: q0.x * one_min_t + q1.x * t,
+            y: q0.y * one_min_t + q1.y * t,
+            z: q0.z * one_min_t + q1.z * t,
         }
     }
 }
@@ -256,6 +294,16 @@ impl Mul<Real> for Quat {
                   self.x * rhs,
                   self.y * rhs,
                   self.z * rhs)
+    }
+}
+
+impl MulAssign<Quat> for Quat {
+    fn mul_assign(&mut self, rhs: Quat) {
+        let new = *self * rhs;
+        self.w = new.w;
+        self.x = new.x;
+        self.y = new.y;
+        self.z = new.z;
     }
 }
 

@@ -235,14 +235,13 @@ impl From<[[Real; 3]; 3]> for Mat3 {
 
 impl From<Quat> for Mat3 {
     fn from(q: Quat) -> Self {
-        let w2 = q.w * q.w;
         let x2 = q.x * q.x;
         let y2 = q.y * q.y;
         let z2 = q.z * q.z;
 
-        Self::new(1.0 - 2.0 * (y2 - z2), 2.0 * (q.x * q.y + q.w * q.z), 2.0 * (q.x * q.z - q.w * q.y),
-                  2.0 * (q.x * q.y - q.w * q.z), 1.0 - 2.0 * (x2 - z2), 2.0 * (q.y * q.z + q.w * q.x),
-                  2.0 * (q.x * q.z + q.w * q.y), 2.0 * (q.y * q.z - q.w * q.x), 1.0 - 2.0 * (x2 - y2))
+        Self::new(1.0 - 2.0 * (y2 + z2), 2.0 * (q.x * q.y + q.w * q.z), 2.0 * (q.x * q.z - q.w * q.y),
+                  2.0 * (q.x * q.y - q.w * q.z), 1.0 - 2.0 * (x2 + z2), 2.0 * (q.y * q.z + q.w * q.x),
+                  2.0 * (q.x * q.z + q.w * q.y), 2.0 * (q.y * q.z - q.w * q.x), 1.0 - 2.0 * (x2 + y2))
     }
 }
 
