@@ -30,12 +30,12 @@ impl Quat {
         lhs.w * rhs.w + lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z
     }
 
-    fn length_squared(&self) -> Real {
+    fn magnitude_squared(&self) -> Real {
         Self::dot(self, self)
     }
 
-    pub fn length(&self) -> Real {
-        self.length_squared().sqrt()
+    pub fn magnitude(&self) -> Real {
+        self.magnitude_squared().sqrt()
     }
 
     pub fn conjugate(&self) -> Quat {
@@ -46,8 +46,18 @@ impl Quat {
     }
 
     pub fn inverse(&self) -> Quat {
-        let inv_fact = 1.0 / self.length();
+        let inv_fact = 1.0 / self.magnitude();
         self.conjugate() * inv_fact
+    }
+
+    pub fn normalized(&self) -> Quat {
+        let scale = 1.0 / self.magnitude();
+        Quat {
+            w: self.w * scale,
+            x: self.x * scale,
+            y: self.y * scale,
+            z: self.z * scale,
+        }
     }
 
     pub fn is_pure(&self) -> bool {
@@ -55,7 +65,7 @@ impl Quat {
     }
 
     pub fn is_unit(&self) -> bool {
-        self.length_squared().approx_eq(1.0, DEF_F32_EPSILON)
+        self.magnitude_squared().approx_eq(1.0, DEF_F32_EPSILON)
     }
 
     pub fn is_pure_unit(&self) -> bool {
@@ -179,7 +189,7 @@ impl Quat {
     }
 
     //Performs a rotation around an arbitary unit axis
-    pub fn angle_axis(n: Vec3, theta: Real) -> Quat {
+    pub fn from_angle_axis(n: Vec3, theta: Real) -> Quat {
         debug_assert!(n.is_unit());
         let half_theta = theta * 0.5;
 
@@ -191,9 +201,33 @@ impl Quat {
         }
     }
 
+    pub fn to_angle_axis(&self) -> (Vec3, Real) {
+        let q = if self.w > 1.0 {
+            self.normalized()
+        } else {
+            *self
+        };
+
+        let theta = 2.0 * q.w;
+        let s = (1.0 - q.w * q.w).sqrt();
+        if s < 0.001 {
+            (Vec3 {
+                x: q.x,
+                y: q.y,
+                z: q.z,
+            }.normalized(), theta)
+        } else {
+            (Vec3 {
+                x: q.x / s,
+                y: q.y / s,
+                z: q.z / s,
+            }, theta)
+        }
+    }
+
     //Rotates the quaternion around an arbitrary axis
     pub fn rotate_around(&mut self, n: Vec3, theta: Real) {
-        *self *= Self::angle_axis(n, theta);
+        *self *= Self::from_angle_axis(n, theta);
     }
 
 
@@ -294,6 +328,16 @@ impl Mul<Real> for Quat {
                   self.x * rhs,
                   self.y * rhs,
                   self.z * rhs)
+    }
+}
+
+impl Mul<Vec3> for Quat {
+    type Output = Vec3;
+
+    fn mul(self, rhs: Vec3) -> Self::Output {
+        let p = Quat { w: 0.0, x: rhs.x, y: rhs.y, z: rhs.z };
+        let ps = self * p * self.inverse();
+        Vec3 { x: ps.x, y: ps.y, z: ps.z }
     }
 }
 
