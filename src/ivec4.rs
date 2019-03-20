@@ -24,19 +24,10 @@ impl IVec4 {
         IVec4 { x, y, z, w }
     }
 
-    pub fn zero() -> IVec4 {
-        IVec4 { x: 0, y: 0, z: 0, w: 0 }
-    }
-
-    pub fn one() -> IVec4 {
-        IVec4 { x: 1, y: 1, z: 1, w: 1 }
-    }
-
     pub fn all(t: Integer) -> IVec4 {
         IVec4 { x: t, y: t, z: t, w: t }
     }
-
-
+    
     pub fn dot(lhs: &IVec4, rhs: &IVec4) -> Integer {
         lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z + lhs.w * rhs.w
     }
@@ -221,7 +212,7 @@ impl From<IVec3> for IVec4 {
 
 impl Default for IVec4 {
     fn default() -> Self {
-        IVec4::zero()
+        IVec4::ZERO
     }
 }
 

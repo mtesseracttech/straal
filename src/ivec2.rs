@@ -178,7 +178,7 @@ impl From<IVec4> for IVec2 {
 
 impl Default for IVec2 {
     fn default() -> Self {
-        IVec2::zero()
+        IVec2::ZERO
     }
 }
 

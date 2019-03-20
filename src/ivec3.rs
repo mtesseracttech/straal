@@ -193,7 +193,7 @@ impl From<IVec4> for IVec3 {
 
 impl Default for IVec3 {
     fn default() -> Self {
-        IVec3::zero()
+        IVec3::ZERO
     }
 }
 
