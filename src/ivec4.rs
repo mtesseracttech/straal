@@ -13,6 +13,13 @@ pub struct IVec4 {
 }
 
 impl IVec4 {
+    pub const ZERO: IVec4 = IVec4 { x: 0, y: 0, z: 0, w: 0 };
+    pub const ONE: IVec4 = IVec4 { x: 1, y: 1, z: 1, w: 1 };
+    pub const RIGHT: IVec4 = IVec4 { x: 1, y: 0, z: 0, w: 0 };
+    pub const UP: IVec4 = IVec4 { x: 0, y: 1, z: 0, w: 0 };
+    pub const FORWARD: IVec4 = IVec4 { x: 0, y: 0, z: 1, w: 0 };
+    pub const W_ONLY: IVec4 = IVec4 { x: 0, y: 0, z: 0, w: 1 };
+
     pub fn new(x: Integer, y: Integer, z: Integer, w: Integer) -> IVec4 {
         IVec4 { x, y, z, w }
     }

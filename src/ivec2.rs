@@ -11,15 +11,11 @@ pub struct IVec2 {
 }
 
 impl IVec2 {
+    pub const ZERO: IVec2 = IVec2 { x: 0, y: 0 };
+    pub const ONE: IVec2 = IVec2 { x: 1, y: 1 };
+
     pub fn new(x: Integer, y: Integer) -> IVec2 {
         IVec2 { x, y }
-    }
-
-    pub fn zero() -> IVec2 {
-        IVec2 { x: 0, y: 0 }
-    }
-    pub fn one() -> IVec2 {
-        IVec2 { x: 1, y: 1 }
     }
 
     pub fn all(t: Integer) -> IVec2 {

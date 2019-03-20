@@ -12,22 +12,19 @@ pub struct IVec3 {
 }
 
 impl IVec3 {
+    pub const ZERO: IVec3 = IVec3 { x: 0, y: 0, z: 0 };
+    pub const ONE: IVec3 = IVec3 { x: 1, y: 1, z: 1 };
+    pub const RIGHT: IVec3 = IVec3 { x: 1, y: 0, z: 0 };
+    pub const UP: IVec3 = IVec3 { x: 0, y: 1, z: 0 };
+    pub const FORWARD: IVec3 = IVec3 { x: 0, y: 0, z: 1 };
+
     pub fn new(x: Integer, y: Integer, z: Integer) -> IVec3 {
         IVec3 { x, y, z }
-    }
-
-    pub fn zero() -> IVec3 {
-        IVec3 { x: 0, y: 0, z: 0 }
-    }
-
-    pub fn one() -> IVec3 {
-        IVec3 { x: 1, y: 1, z: 1 }
     }
 
     pub fn all(t: Integer) -> IVec3 {
         IVec3 { x: t, y: t, z: t }
     }
-
 
     pub fn dot(lhs: &IVec3, rhs: &IVec3) -> Integer {
         lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z
