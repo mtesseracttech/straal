@@ -8,8 +8,8 @@ use super::*;
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
 pub struct Mat2 {
-    r0: Vec2,
-    r1: Vec2,
+    pub r0: Vec2,
+    pub r1: Vec2,
 }
 
 impl Mat2 {

@@ -97,3 +97,29 @@ pub fn get_time(timer: &SystemTime) -> f32 {
         }
     }
 }
+
+#[derive(Copy, Clone)]
+pub struct VertexPosColor {
+    position: Vec2,
+    color: Vec3,
+}
+
+implement_vertex!(VertexPosColor, position,color);
+
+pub fn get_triangle() -> Vec<VertexPosColor> {
+    let vertex1 = VertexPosColor { position: Vec2::new(-0.5, -0.5), color: Vec3::new(1.0, 0.0, 0.0) };
+    let vertex2 = VertexPosColor { position: Vec2::new(0.0, 0.5), color: Vec3::new(0.0, 1.0, 0.0) };
+    let vertex3 = VertexPosColor { position: Vec2::new(0.5, -0.5), color: Vec3::new(0.0, 0.0, 1.0) };
+    vec![vertex1, vertex2, vertex3]
+}
+
+pub fn def_draw_params() -> glium::DrawParameters<'static> {
+    glium::DrawParameters {
+        depth: glium::Depth {
+            test: glium::draw_parameters::DepthTest::IfLess,
+            write: true,
+            ..Default::default()
+        },
+        ..Default::default()
+    }
+}

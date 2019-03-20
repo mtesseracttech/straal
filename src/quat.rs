@@ -69,7 +69,7 @@ impl Quat {
     }
 
     pub fn is_pure_unit(&self) -> bool {
-        self.is_pure() && self.is_unit()
+        self.is_pure() & &self.is_unit()
     }
 
 
@@ -193,11 +193,13 @@ impl Quat {
         debug_assert!(n.is_unit());
         let half_theta = theta * 0.5;
 
+        let sin_half_theta = half_theta.sin();
+
         Quat {
             w: half_theta.cos(),
-            x: n.x * half_theta.sin(),
-            y: n.y * half_theta.sin(),
-            z: n.z * half_theta.sin(),
+            x: n.x * sin_half_theta,
+            y: n.y * sin_half_theta,
+            z: n.z * sin_half_theta,
         }
     }
 
@@ -335,9 +337,18 @@ impl Mul<Vec3> for Quat {
     type Output = Vec3;
 
     fn mul(self, rhs: Vec3) -> Self::Output {
-        let p = Quat { w: 0.0, x: rhs.x, y: rhs.y, z: rhs.z };
+        let p = Quat {
+            w: 0.0,
+            x: rhs.x,
+            y: rhs.y,
+            z: rhs.z,
+        };
         let ps = self * p * self.inverse();
-        Vec3 { x: ps.x, y: ps.y, z: ps.z }
+        Vec3 {
+            x: ps.x,
+            y: ps.y,
+            z: ps.z,
+        }
     }
 }
 
@@ -373,8 +384,8 @@ impl Div<Real> for Quat {
 
 impl PartialEq for Quat {
     fn eq(&self, other: &Quat) -> bool {
-        self.w.approx_eq(other.w, DEF_F32_EPSILON) && self.x.approx_eq(other.x, DEF_F32_EPSILON) &&
-            self.y.approx_eq(other.y, DEF_F32_EPSILON) && self.z.approx_eq(other.z, DEF_F32_EPSILON)
+        self.w.approx_eq(other.w, DEF_F32_EPSILON) & &self.x.approx_eq(other.x, DEF_F32_EPSILON) & &
+            self.y.approx_eq(other.y, DEF_F32_EPSILON) & &self.z.approx_eq(other.z, DEF_F32_EPSILON)
     }
 }
 

@@ -8,9 +8,9 @@ use super::*;
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
 pub struct Mat3 {
-    r0: Vec3,
-    r1: Vec3,
-    r2: Vec3,
+    pub r0: Vec3,
+    pub r1: Vec3,
+    pub r2: Vec3,
 }
 
 impl Mat3 {
@@ -131,6 +131,11 @@ impl Mat3 {
             y: heading,
             z: bank,
         }
+    }
+
+    //Rotates the matrix around an arbitrary axis
+    pub fn rotate_around(&mut self, n: Vec3, theta: Real) {
+        *self *= Self::get_angle_axis(n, theta);
     }
 
     //Performs a rotation around an arbitary unit axis
