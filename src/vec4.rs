@@ -30,12 +30,12 @@ impl Vec4 {
         Vec4 { x: t, y: t, z: t, w: t }
     }
 
-    pub fn dot(lhs: &Vec4, rhs: &Vec4) -> Real {
+    pub fn dot(lhs: Vec4, rhs: Vec4) -> Real {
         lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z + lhs.w * rhs.w
     }
 
     pub fn length_squared(&self) -> Real {
-        Vec4::dot(self, self)
+        Vec4::dot(*self, *self)
     }
 
     //Returns the euclidean distance of the vector

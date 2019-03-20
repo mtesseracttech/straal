@@ -71,9 +71,9 @@ pub fn get_perspective_matrix(target_dims: &Vec2) -> Mat4 {
 
 pub fn get_view_matrix(pos: &Vec3, dir: &Vec3, up: &Vec3) -> Mat4 {
     let fwd = dir.normalized();
-    let rht = Vec3::cross(up, &fwd).normalized();
-    let up = Vec3::cross(&fwd, &rht);
-    let pos = Vec3::new(-Vec3::dot(pos, &rht), -Vec3::dot(pos, &up), -Vec3::dot(pos, &fwd));
+    let rht = Vec3::cross(*up, fwd).normalized();
+    let up = Vec3::cross(fwd, rht);
+    let pos = Vec3::new(-Vec3::dot(*pos, rht), -Vec3::dot(*pos, up), -Vec3::dot(*pos, fwd));
 
     Mat4::new_from_vec4s(Vec4::from((rht, pos.x)),
                          Vec4::from((up, pos.y)),

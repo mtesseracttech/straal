@@ -40,18 +40,18 @@ impl Vec3 {
         Self::new(0.0, 0.0, 1.0)
     }
 
-    pub fn dot(lhs: &Vec3, rhs: &Vec3) -> Real {
+    pub fn dot(lhs: Vec3, rhs: Vec3) -> Real {
         lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z
     }
 
-    pub fn cross(lhs: &Vec3, rhs: &Vec3) -> Self {
+    pub fn cross(lhs: Vec3, rhs: Vec3) -> Self {
         Self::new(lhs.y * rhs.z - lhs.z * rhs.y,
                   lhs.z * rhs.x - lhs.x * rhs.z,
                   lhs.x * rhs.y - lhs.y * rhs.x)
     }
 
     pub fn length_squared(&self) -> Real {
-        Vec3::dot(self, self)
+        Vec3::dot(*self, *self)
     }
 
     pub fn length(&self) -> Real {
@@ -124,7 +124,9 @@ impl AddAssign<Vec3> for Vec3 {
 impl Sub<Vec3> for Vec3 {
     type Output = Self;
 
-    fn sub(self, rhs: Vec3) -> Self::Output { Self::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z) }
+    fn sub(self, rhs: Vec3) -> Self::Output {
+        Self::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z)
+    }
 }
 
 impl SubAssign<Vec3> for Vec3 {
@@ -135,11 +137,29 @@ impl SubAssign<Vec3> for Vec3 {
     }
 }
 
+impl Mul<Vec3> for Real {
+    type Output = Vec3;
+
+    fn mul(self, rhs: Vec3) -> Self::Output {
+        Vec3 {
+            x: rhs.x * self,
+            y: rhs.y * self,
+            z: rhs.z * self,
+        }
+    }
+}
+
 
 impl Mul<Real> for Vec3 {
     type Output = Self;
 
-    fn mul(self, rhs: Real) -> Self::Output { Self::new(self.x * rhs, self.y * rhs, self.z * rhs) }
+    fn mul(self, rhs: Real) -> Self::Output {
+        Vec3 {
+            x: self.x * rhs,
+            y: self.y * rhs,
+            z: self.z * rhs,
+        }
+    }
 }
 
 

@@ -39,12 +39,12 @@ impl Vec2 {
         Self::new(0.0, 1.0)
     }
 
-    pub fn dot(lhs: &Vec2, rhs: &Vec2) -> Real {
+    pub fn dot(lhs: Vec2, rhs: Vec2) -> Real {
         lhs.x * rhs.x + lhs.y * rhs.y
     }
 
     pub fn length_squared(&self) -> Real {
-        Vec2::dot(self, self)
+        Vec2::dot(*self, *self)
     }
 
     pub fn length(&self) -> Real {

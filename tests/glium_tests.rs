@@ -173,13 +173,13 @@ pub mod glium_test {
 
         let mut quat = Quat::identity();
 
-        quat.rotate_around(Vec3::up(), 0.2 * 2.3);
+        //quat.rotate_around(Vec3::up(), 0.2 * 2.3);
         //let x_axis = Mat3::from(quat).r0.normalized();
-        let x_axis = (quat * Vec3::right()).normalized();
-        quat.rotate_around(x_axis, 0.2 * 2.9);
+        //let x_axis = (quat * Vec3::right()).normalized();
+        //quat.rotate_around(x_axis, 0.2 * 2.9);
         //let x_axis2 = Mat3::from(quat).r0.normalized();
-        let x_axis2 = (quat * Vec3::right()).normalized();
-        println!("x axis 1: {:?}, x axis 2: {:?}", x_axis, x_axis2);
+        //let x_axis2 = (quat * Vec3::right()).normalized();
+        //println!("x axis 1: {:?}, x axis 2: {:?}", x_axis, x_axis2);
 
         let mut closed = false;
         while !closed {
@@ -189,9 +189,9 @@ pub mod glium_test {
 
             let mut target = display.draw();
 
-            quat.rotate_around(Vec3::up(), delta_time * 2.3);
-            let x_axis = (quat * Vec3::right()).normalized();
-            quat.rotate_around(x_axis, delta_time * 2.9);
+            //quat.rotate_around(Vec3::up(), delta_time * 2.3);
+            //let x_axis = (quat * Vec3::right()).normalized();
+            //quat.rotate_around(Vec3::right(), delta_time * 2.9);
 
             let model_matrix = get_model_matrix(&Vec3::new(0.0, 0.0, 0.0)) * Mat4::from(quat);
 
@@ -247,8 +247,8 @@ pub mod glium_test {
             let mut target = display.draw();
 
             rotation_matrix.rotate_around(Vec3::up(), delta_time * 2.3);
-            let x_axis = rotation_matrix.r0.normalized();
-            rotation_matrix.rotate_around(x_axis, delta_time * 2.9);
+            //let x_axis = rotation_matrix.r0.normalized();
+            rotation_matrix.rotate_around(Vec3::right(), delta_time * 2.9);
 
             let mut model_matrix = get_model_matrix(&Vec3::new(0.0, 0.0, 0.0)) * Mat4::from(rotation_matrix);
 

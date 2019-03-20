@@ -225,10 +225,10 @@ impl Mul<Mat4> for Mat4 {
 
     fn mul(self, rhs: Mat4) -> Self::Output {
         let rhs = rhs.transpose();
-        Mat4::new(Vec4::dot(&self[0], &rhs[0]), Vec4::dot(&self[0], &rhs[1]), Vec4::dot(&self[0], &rhs[2]), Vec4::dot(&self[0], &rhs[3]),
-                  Vec4::dot(&self[1], &rhs[0]), Vec4::dot(&self[1], &rhs[1]), Vec4::dot(&self[1], &rhs[2]), Vec4::dot(&self[1], &rhs[3]),
-                  Vec4::dot(&self[2], &rhs[0]), Vec4::dot(&self[2], &rhs[1]), Vec4::dot(&self[2], &rhs[2]), Vec4::dot(&self[2], &rhs[3]),
-                  Vec4::dot(&self[3], &rhs[0]), Vec4::dot(&self[3], &rhs[1]), Vec4::dot(&self[3], &rhs[2]), Vec4::dot(&self[3], &rhs[3]))
+        Mat4::new(Vec4::dot(self[0], rhs[0]), Vec4::dot(self[0], rhs[1]), Vec4::dot(self[0], rhs[2]), Vec4::dot(self[0], rhs[3]),
+                  Vec4::dot(self[1], rhs[0]), Vec4::dot(self[1], rhs[1]), Vec4::dot(self[1], rhs[2]), Vec4::dot(self[1], rhs[3]),
+                  Vec4::dot(self[2], rhs[0]), Vec4::dot(self[2], rhs[1]), Vec4::dot(self[2], rhs[2]), Vec4::dot(self[2], rhs[3]),
+                  Vec4::dot(self[3], rhs[0]), Vec4::dot(self[3], rhs[1]), Vec4::dot(self[3], rhs[2]), Vec4::dot(self[3], rhs[3]))
     }
 }
 
@@ -237,10 +237,10 @@ impl Mul<Vec4> for Mat4 {
 
     fn mul(self, rhs: Vec4) -> Self::Output {
         Vec4::new(
-            Vec4::dot(&self.r0, &rhs),
-            Vec4::dot(&self.r1, &rhs),
-            Vec4::dot(&self.r2, &rhs),
-            Vec4::dot(&self.r3, &rhs),
+            Vec4::dot(self.r0, rhs),
+            Vec4::dot(self.r1, rhs),
+            Vec4::dot(self.r2, rhs),
+            Vec4::dot(self.r3, rhs),
         )
     }
 }

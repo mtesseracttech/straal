@@ -7,31 +7,30 @@ use super::*;
 #[derive(Copy, Clone, Debug)]
 pub struct Quat {
     pub w: Real,
-    pub x: Real,
-    pub y: Real,
-    pub z: Real,
+    pub v: Vec3,
 }
 
 impl Quat {
     pub fn new(w: Real, x: Real, y: Real, z: Real) -> Quat {
-        Quat { w, x, y, z }
+        Quat {
+            w,
+            v: Vec3 { x, y, z },
+        }
     }
 
     pub fn identity() -> Quat {
         Quat {
             w: 1.0,
-            x: 0.0,
-            y: 0.0,
-            z: 0.0,
+            v: Vec3::zero(),
         }
     }
 
-    pub fn dot(lhs: &Quat, rhs: &Quat) -> Real {
-        lhs.w * rhs.w + lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z
+    pub fn dot(lhs: Quat, rhs: Quat) -> Real {
+        lhs.w * rhs.w + Vec3::dot(lhs.v, rhs.v)
     }
 
     fn magnitude_squared(&self) -> Real {
-        Self::dot(self, self)
+        Self::dot(*self, *self)
     }
 
     pub fn magnitude(&self) -> Real {
@@ -39,10 +38,10 @@ impl Quat {
     }
 
     pub fn conjugate(&self) -> Quat {
-        Self::new(self.w,
-                  -self.x,
-                  -self.y,
-                  -self.z)
+        Quat {
+            w: self.w,
+            v: -self.v,
+        }
     }
 
     pub fn inverse(&self) -> Quat {
@@ -54,9 +53,7 @@ impl Quat {
         let scale = 1.0 / self.magnitude();
         Quat {
             w: self.w * scale,
-            x: self.x * scale,
-            y: self.y * scale,
-            z: self.z * scale,
+            v: self.v * scale,
         }
     }
 
@@ -69,7 +66,7 @@ impl Quat {
     }
 
     pub fn is_pure_unit(&self) -> bool {
-        self.is_pure() & &self.is_unit()
+        self.is_pure() && self.is_unit()
     }
 
 
@@ -80,16 +77,12 @@ impl Quat {
             let scalar = new_alpha.sin() / alpha.sin();
             Quat {
                 w: new_alpha.cos(),
-                x: self.x * scalar,
-                y: self.y * scalar,
-                z: self.z * scalar,
+                v: self.v * scalar,
             }
         } else {
             Quat {
                 w: self.w,
-                x: self.x,
-                y: self.y,
-                z: self.z,
+                v: self.v,
             }
         }
     }
@@ -109,9 +102,11 @@ impl Quat {
 
         Quat {
             w: ch * cp * cb + sh * sp * sb,
-            x: ch * sp * cb + sh * cp * sb,
-            y: sh * cp * cb - ch * sp * sb,
-            z: ch * cp * sb - sh * sp * cb,
+            v: Vec3 {
+                x: ch * sp * cb + sh * cp * sb,
+                y: sh * cp * cb - ch * sp * sb,
+                z: ch * cp * sb - sh * sp * cb,
+            },
         }
     }
 
@@ -134,9 +129,11 @@ impl Quat {
 
         Quat {
             w: ch * cp * cb + sh * sp * sb,
-            x: -ch * sp * cb - sh * cp * sb,
-            y: ch * sp * sb - sh * cp * cb,
-            z: sh * sp * cb - ch * cp * sb,
+            v: Vec3 {
+                x: -ch * sp * cb - sh * cp * sb,
+                y: ch * sp * sb - sh * cp * cb,
+                z: sh * sp * cb - ch * cp * sb,
+            },
         }
     }
 
@@ -145,19 +142,19 @@ impl Quat {
     }
 
     pub fn get_euler_angles_obj_upr_rad(&self) -> Vec3 {
-        let sin_pitch = -2.0 * (self.y * self.z - self.w * self.x);
+        let sin_pitch = -2.0 * (self.v.y * self.v.z - self.w * self.v.x);
 
         if sin_pitch.abs() > 0.9999 {
             Vec3 {
                 x: std::f32::consts::FRAC_PI_2 * sin_pitch,
-                y: (-self.x * self.z + self.w * self.y).atan2(0.5 - self.y * self.y - self.z * self.z),
+                y: (-self.v.x * self.v.z + self.w * self.v.y).atan2(0.5 - self.v.y * self.v.y - self.v.z * self.v.z),
                 z: 0.0,
             }
         } else {
             Vec3 {
                 x: sin_pitch.asin(),
-                y: (self.x * self.z + self.w * self.y).atan2(0.5 - self.x * self.x - self.y * self.y),
-                z: (self.x * self.y + self.w * self.z).atan2(0.5 - self.x * self.x - self.z * self.z),
+                y: (self.v.x * self.v.z + self.w * self.v.y).atan2(0.5 - self.v.x * self.v.x - self.v.y * self.v.y),
+                z: (self.v.x * self.v.y + self.w * self.v.z).atan2(0.5 - self.v.x * self.v.x - self.v.z * self.v.z),
             }
         }
     }
@@ -167,19 +164,19 @@ impl Quat {
     }
 
     pub fn get_euler_angles_upr_obj_rad(&self) -> Vec3 {
-        let sin_pitch = -2.0 * (self.y * self.z + self.w * self.x);
+        let sin_pitch = -2.0 * (self.v.y * self.v.z + self.w * self.v.x);
 
         if sin_pitch.abs() > 0.9999 {
             Vec3 {
                 x: std::f32::consts::FRAC_PI_2 * sin_pitch,
-                y: (-self.x * self.z - self.w * self.y).atan2(0.5 - self.y * self.y - self.z * self.z),
+                y: (-self.v.x * self.v.z - self.w * self.v.y).atan2(0.5 - self.v.y * self.v.y - self.v.z * self.v.z),
                 z: 0.0,
             }
         } else {
             Vec3 {
                 x: sin_pitch.asin(),
-                y: (self.x * self.z - self.w * self.y).atan2(0.5 - self.x * self.x - self.y * self.y),
-                z: (self.x * self.y - self.w * self.z).atan2(0.5 - self.x * self.x - self.z * self.z),
+                y: (self.v.x * self.v.z - self.w * self.v.y).atan2(0.5 - self.v.x * self.v.x - self.v.y * self.v.y),
+                z: (self.v.x * self.v.y - self.w * self.v.z).atan2(0.5 - self.v.x * self.v.x - self.v.z * self.v.z),
             }
         }
     }
@@ -193,13 +190,9 @@ impl Quat {
         debug_assert!(n.is_unit());
         let half_theta = theta * 0.5;
 
-        let sin_half_theta = half_theta.sin();
-
         Quat {
             w: half_theta.cos(),
-            x: n.x * sin_half_theta,
-            y: n.y * sin_half_theta,
-            z: n.z * sin_half_theta,
+            v: n * half_theta.sin(),
         }
     }
 
@@ -213,28 +206,20 @@ impl Quat {
         let theta = 2.0 * q.w;
         let s = (1.0 - q.w * q.w).sqrt();
         if s < 0.001 {
-            (Vec3 {
-                x: q.x,
-                y: q.y,
-                z: q.z,
-            }.normalized(), theta)
+            (q.v.normalized(), theta)
         } else {
-            (Vec3 {
-                x: q.x / s,
-                y: q.y / s,
-                z: q.z / s,
-            }, theta)
+            (q.v / s, theta)
         }
     }
 
-    //Rotates the quaternion around an arbitrary axis
-    pub fn rotate_around(&mut self, n: Vec3, theta: Real) {
-        *self *= Self::from_angle_axis(n, theta);
-    }
+//    //Rotates the quaternion around an arbitrary axis
+//    pub fn rotate_around(&mut self, n: Vec3, theta: Real) {
+//        *self *= Self::from_angle_axis(n, theta);
+//    }
 
 
     pub fn slerp(&self, other: Quat, t: Real) -> Quat {
-        let mut cos_omega = Self::dot(self, &other);
+        let mut cos_omega = Self::dot(*self, other);
 
         let q0 = *self;
         let mut q1 = other;
@@ -263,14 +248,12 @@ impl Quat {
 
         Quat {
             w: q0.w * k0 + q1.w * k1,
-            x: q0.x * k0 + q1.x * k1,
-            y: q0.y * k0 + q1.y * k1,
-            z: q0.z * k0 + q1.z * k1,
+            v: q0.v * k0 + q1.v * k1,
         }
     }
 
     pub fn lerp(&self, other: Quat, t: Real) -> Quat {
-        let mut cos_omega = Self::dot(self, &other);
+        let mut cos_omega = Self::dot(*self, other);
 
         let q0 = *self;
         let mut q1 = other;
@@ -283,9 +266,7 @@ impl Quat {
 
         Quat {
             w: q0.w * one_min_t + q1.w * t,
-            x: q0.x * one_min_t + q1.x * t,
-            y: q0.y * one_min_t + q1.y * t,
-            z: q0.z * one_min_t + q1.z * t,
+            v: q0.v * one_min_t + q1.v * t,
         }
     }
 }
@@ -304,9 +285,7 @@ impl Neg for Quat {
     fn neg(self) -> Self::Output {
         Quat {
             w: -self.w,
-            x: -self.x,
-            y: -self.y,
-            z: -self.z,
+            v: -self.v,
         }
     }
 }
@@ -315,10 +294,10 @@ impl Mul<Quat> for Quat {
     type Output = Quat;
 
     fn mul(self, rhs: Quat) -> Self::Output {
-        Self::new(self.w * rhs.w - self.x * rhs.x - self.y * rhs.y - self.z * rhs.z,
-                  self.w * rhs.x + self.x * rhs.w + self.y * rhs.z - self.z * rhs.y,
-                  self.w * rhs.y - self.x * rhs.z + self.y * rhs.w + self.z * rhs.x,
-                  self.w * rhs.z + self.x * rhs.y - self.y * rhs.x + self.z * rhs.w)
+        Quat {
+            w: self.w * rhs.w - Vec3::dot(self.v, rhs.v),
+            v: self.w * rhs.v + rhs.w * self.v + Vec3::cross(self.v, rhs.v),
+        }
     }
 }
 
@@ -326,10 +305,10 @@ impl Mul<Real> for Quat {
     type Output = Quat;
 
     fn mul(self, rhs: Real) -> Self::Output {
-        Self::new(self.w * rhs,
-                  self.x * rhs,
-                  self.y * rhs,
-                  self.z * rhs)
+        Quat {
+            w: self.w * rhs,
+            v: self.v * rhs,
+        }
     }
 }
 
@@ -339,26 +318,18 @@ impl Mul<Vec3> for Quat {
     fn mul(self, rhs: Vec3) -> Self::Output {
         let p = Quat {
             w: 0.0,
-            x: rhs.x,
-            y: rhs.y,
-            z: rhs.z,
+            v: rhs,
         };
         let ps = self * p * self.inverse();
-        Vec3 {
-            x: ps.x,
-            y: ps.y,
-            z: ps.z,
-        }
+        ps.v
     }
 }
 
 impl MulAssign<Quat> for Quat {
     fn mul_assign(&mut self, rhs: Quat) {
-        let new = *self * rhs;
-        self.w = new.w;
-        self.x = new.x;
-        self.y = new.y;
-        self.z = new.z;
+        let temp = *self * rhs;
+        self.w = temp.w;
+        self.v = temp.v;
     }
 }
 
@@ -375,35 +346,48 @@ impl Div<Real> for Quat {
 
     fn div(self, rhs: Real) -> Self::Output {
         let inv = 1.0 / rhs;
-        Self::new(self.w * inv,
-                  self.x * inv,
-                  self.y * inv,
-                  self.z * inv)
+        Quat {
+            w: self.w * inv,
+            v: self.v * inv,
+        }
     }
 }
 
 impl PartialEq for Quat {
     fn eq(&self, other: &Quat) -> bool {
-        self.w.approx_eq(other.w, DEF_F32_EPSILON) & &self.x.approx_eq(other.x, DEF_F32_EPSILON) & &
-            self.y.approx_eq(other.y, DEF_F32_EPSILON) & &self.z.approx_eq(other.z, DEF_F32_EPSILON)
+        self.w.approx_eq(other.w, DEF_F32_EPSILON) && self.v == other.v
     }
 }
 
 impl fmt::Display for Quat {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:.2} ({:.2}i {:.2}j {:.2}k)", self.w, self.x, self.y, self.z)
+        write!(f, "{:.2} ({:.2}i {:.2}j {:.2}k)", self.w, self.v.x, self.v.y, self.v.z)
     }
 }
 
 impl From<(Real, Real, Real, Real)> for Quat {
     fn from(tuple: (Real, Real, Real, Real)) -> Self {
-        Self::new(tuple.0, tuple.1, tuple.2, tuple.3)
+        Quat {
+            w: tuple.0,
+            v: Vec3 {
+                x: tuple.1,
+                y: tuple.2,
+                z: tuple.3,
+            },
+        }
     }
 }
 
 impl From<[Real; 4]> for Quat {
     fn from(arr: [Real; 4]) -> Self {
-        Self::new(arr[0], arr[1], arr[2], arr[3])
+        Quat {
+            w: arr[0],
+            v: Vec3 {
+                x: arr[1],
+                y: arr[2],
+                z: arr[3],
+            },
+        }
     }
 }
 
@@ -436,33 +420,41 @@ impl From<Mat3> for Quat {
             0 => {
                 Quat {
                     w: biggest_val,
-                    x: (m[1][2] - m[2][1]) * mult,
-                    y: (m[2][0] - m[0][2]) * mult,
-                    z: (m[0][1] - m[1][0]) * mult,
+                    v: Vec3 {
+                        x: m[1][2] - m[2][1],
+                        y: m[2][0] - m[0][2],
+                        z: m[0][1] - m[1][0],
+                    } * mult,
                 }
             }
             1 => {
                 Quat {
                     w: (m[1][2] - m[2][1]) * mult,
-                    x: biggest_val,
-                    y: (m[0][1] + m[1][0]) * mult,
-                    z: (m[2][0] + m[0][2]) * mult,
+                    v: Vec3 {
+                        x: biggest_val,
+                        y: (m[0][1] + m[1][0]) * mult,
+                        z: (m[2][0] + m[0][2]) * mult,
+                    },
                 }
             }
             2 => {
                 Quat {
                     w: (m[2][0] - m[0][2]) * mult,
-                    x: (m[0][1] + m[1][0]) * mult,
-                    y: biggest_val,
-                    z: (m[2][1] + m[1][2]) * mult,
+                    v: Vec3 {
+                        x: (m[0][1] + m[1][0]) * mult,
+                        y: biggest_val,
+                        z: (m[2][1] + m[1][2]) * mult,
+                    },
                 }
             }
             3 => {
                 Quat {
-                    w: (m[0][1] - m[1][0] * mult),
-                    x: (m[2][0] + m[0][2] * mult),
-                    y: (m[1][2] + m[2][1] * mult),
-                    z: biggest_val,
+                    w: (m[0][1] - m[1][0]) * mult,
+                    v: Vec3 {
+                        x: (m[2][0] + m[0][2]) * mult,
+                        y: (m[1][2] + m[2][1]) * mult,
+                        z: biggest_val,
+                    },
                 }
             }
             _ => {

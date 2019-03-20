@@ -184,9 +184,9 @@ impl Mul<Mat3> for Mat3 {
 
     fn mul(self, rhs: Mat3) -> Self::Output {
         let rhs = rhs.transpose();
-        Mat3::new(Vec3::dot(&self[0], &rhs[0]), Vec3::dot(&self[0], &rhs[1]), Vec3::dot(&self[0], &rhs[2]),
-                  Vec3::dot(&self[1], &rhs[0]), Vec3::dot(&self[1], &rhs[1]), Vec3::dot(&self[1], &rhs[2]),
-                  Vec3::dot(&self[2], &rhs[0]), Vec3::dot(&self[2], &rhs[1]), Vec3::dot(&self[2], &rhs[2]))
+        Mat3::new(Vec3::dot(self[0], rhs[0]), Vec3::dot(self[0], rhs[1]), Vec3::dot(self[0], rhs[2]),
+                  Vec3::dot(self[1], rhs[0]), Vec3::dot(self[1], rhs[1]), Vec3::dot(self[1], rhs[2]),
+                  Vec3::dot(self[2], rhs[0]), Vec3::dot(self[2], rhs[1]), Vec3::dot(self[2], rhs[2]))
     }
 }
 
@@ -194,11 +194,11 @@ impl Mul<Vec3> for Mat3 {
     type Output = Vec3;
 
     fn mul(self, rhs: Vec3) -> Self::Output {
-        Vec3::new(
-            Vec3::dot(&self.r0, &rhs),
-            Vec3::dot(&self.r1, &rhs),
-            Vec3::dot(&self.r2, &rhs),
-        )
+        Vec3 {
+            x: Vec3::dot(self.r0, rhs),
+            y: Vec3::dot(self.r1, rhs),
+            z: Vec3::dot(self.r2, rhs),
+        }
     }
 }
 
@@ -240,15 +240,15 @@ impl From<[[Real; 3]; 3]> for Mat3 {
 
 impl From<Quat> for Mat3 {
     fn from(q: Quat) -> Self {
-        let x2 = q.x * q.x;
-        let y2 = q.y * q.y;
-        let z2 = q.z * q.z;
+        let x2 = q.v.x * q.v.x;
+        let y2 = q.v.y * q.v.y;
+        let z2 = q.v.z * q.v.z;
 
         //Credits to https://github.com/Duckfan77 for helping remind me that basic arithmetic is
         //to be taken seriously
-        Self::new(1.0 - 2.0 * (y2 + z2), 2.0 * (q.x * q.y + q.w * q.z), 2.0 * (q.x * q.z - q.w * q.y),
-                  2.0 * (q.x * q.y - q.w * q.z), 1.0 - 2.0 * (x2 + z2), 2.0 * (q.y * q.z + q.w * q.x),
-                  2.0 * (q.x * q.z + q.w * q.y), 2.0 * (q.y * q.z - q.w * q.x), 1.0 - 2.0 * (x2 + y2))
+        Self::new(1.0 - 2.0 * (y2 + z2), 2.0 * (q.v.x * q.v.y + q.w * q.v.z), 2.0 * (q.v.x * q.v.z - q.w * q.v.y),
+                  2.0 * (q.v.x * q.v.y - q.w * q.v.z), 1.0 - 2.0 * (x2 + z2), 2.0 * (q.v.y * q.v.z + q.w * q.v.x),
+                  2.0 * (q.v.x * q.v.z + q.w * q.v.y), 2.0 * (q.v.y * q.v.z - q.w * q.v.x), 1.0 - 2.0 * (x2 + y2))
     }
 }
 

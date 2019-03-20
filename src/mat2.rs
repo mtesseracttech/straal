@@ -72,8 +72,8 @@ impl Mul<Mat2> for Mat2 {
 
     fn mul(self, rhs: Mat2) -> Self::Output {
         let rhs = rhs.transpose();
-        Mat2::new(Vec2::dot(&self.r0, &rhs.r0), Vec2::dot(&self.r0, &rhs.r1),
-                  Vec2::dot(&self.r1, &rhs.r0), Vec2::dot(&self.r1, &rhs.r1))
+        Mat2::new(Vec2::dot(self.r0, rhs.r0), Vec2::dot(self.r0, rhs.r1),
+                  Vec2::dot(self.r1, rhs.r0), Vec2::dot(self.r1, rhs.r1))
     }
 }
 
@@ -82,8 +82,8 @@ impl Mul<Vec2> for Mat2 {
 
     fn mul(self, rhs: Vec2) -> Self::Output {
         Vec2::new(
-            Vec2::dot(&self.r0, &rhs),
-            Vec2::dot(&self.r1, &rhs),
+            Vec2::dot(self.r0, rhs),
+            Vec2::dot(self.r1, rhs),
         )
     }
 }
