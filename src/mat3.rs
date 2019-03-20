@@ -14,12 +14,27 @@ pub struct Mat3 {
 }
 
 impl Mat3 {
+    pub const IDENTITY: Mat3 = Mat3 {
+        r0: Vec3 { x: 1.0, y: 0.0, z: 0.0 },
+        r1: Vec3 { x: 0.0, y: 1.0, z: 0.0 },
+        r2: Vec3 { x: 0.0, y: 0.0, z: 1.0 },
+    };
+
+    pub const EMPTY: Mat3 = Mat3 {
+        r0: Vec3 { x: 0.0, y: 0.0, z: 0.0 },
+        r1: Vec3 { x: 0.0, y: 0.0, z: 0.0 },
+        r2: Vec3 { x: 0.0, y: 0.0, z: 0.0 },
+    };
+
+
     pub fn new(r0c0: Real, r0c1: Real, r0c2: Real,
                r1c0: Real, r1c1: Real, r1c2: Real,
                r2c0: Real, r2c1: Real, r2c2: Real, ) -> Self {
-        Self::new_from_vec3s(Vec3::new(r0c0, r0c1, r0c2),
-                             Vec3::new(r1c0, r1c1, r1c2),
-                             Vec3::new(r2c0, r2c1, r2c2))
+        Mat3 {
+            r0: Vec3 { x: r0c0, y: r0c1, z: r0c2 },
+            r1: Vec3 { x: r1c0, y: r1c1, z: r1c2 },
+            r2: Vec3 { x: r2c0, y: r2c1, z: r2c2 },
+        }
     }
 
     pub fn new_from_vec3s(r0: Vec3, r1: Vec3, r2: Vec3) -> Self {
@@ -57,7 +72,12 @@ impl Mat3 {
     }
 
     pub fn inverse(&self) -> Mat3 {
-        self.adjoint() / self.determinant()
+        let det = self.determinant();
+        if det.approx_eq(0.0, DEF_F32_EPSILON) {
+            self.adjoint() / det
+        } else {
+            Mat3::IDENTITY
+        }
     }
 
     pub fn transpose(&self) -> Self {
@@ -105,7 +125,7 @@ impl Mat3 {
 
 
     pub fn get_euler_angles_obj_upr(&self) -> Vec3 {
-        let mut angles = Vec3::zero();
+        let mut angles = Vec3::ZERO;
 
         let sp = -self[2][1];
         let pitch = if sp <= -1.0 {

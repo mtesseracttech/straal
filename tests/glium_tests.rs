@@ -129,7 +129,7 @@ pub mod glium_test {
 
             let mut target = display.draw();
 
-            model_matrix.rotate_around(Vec3::up(), delta_time * 2.3);
+            model_matrix.rotate_around(Vec3::UP, delta_time * 2.3);
             model_matrix.rotate_around(Vec3::from(model_matrix.r0).normalized(), delta_time * 2.9);
 
             //model_matrix.rotate_around(Vec3::right(), delta_time * 2.3);
@@ -171,7 +171,7 @@ pub mod glium_test {
 
         let program = Shader::load(&display, Shader::COLORED2D).unwrap();
 
-        let mut quat = Quat::identity();
+        let mut quat = Quat::IDENTITY;
 
         //quat.rotate_around(Vec3::up(), 0.2 * 2.3);
         //let x_axis = Mat3::from(quat).r0.normalized();
@@ -232,7 +232,7 @@ pub mod glium_test {
 
         let mut rotation_matrix = Mat3::identity();
 
-        rotation_matrix.rotate_around(Vec3::up(), 0.2 * 2.3);
+        rotation_matrix.rotate_around(Vec3::UP, 0.2 * 2.3);
         let x_axis = rotation_matrix.r0.normalized();
         rotation_matrix.rotate_around(x_axis, 0.2 * 2.9);
         let x_axis2 = rotation_matrix.r0.normalized();
@@ -246,9 +246,8 @@ pub mod glium_test {
 
             let mut target = display.draw();
 
-            rotation_matrix.rotate_around(Vec3::up(), delta_time * 2.3);
-            //let x_axis = rotation_matrix.r0.normalized();
-            rotation_matrix.rotate_around(Vec3::right(), delta_time * 2.9);
+            rotation_matrix.rotate_around(Vec3::UP, delta_time * 2.3);
+            rotation_matrix.rotate_around(Vec3::RIGHT, delta_time * 2.9);
 
             let mut model_matrix = get_model_matrix(&Vec3::new(0.0, 0.0, 0.0)) * Mat4::from(rotation_matrix);
 

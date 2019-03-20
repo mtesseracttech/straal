@@ -13,10 +13,22 @@ pub struct Mat2 {
 }
 
 impl Mat2 {
+    pub const IDENTITY: Mat2 = Mat2 {
+        r0: Vec2 { x: 1.0, y: 0.0 },
+        r1: Vec2 { x: 0.0, y: 1.0 },
+    };
+
+    pub const EMPTY: Mat2 = Mat2 {
+        r0: Vec2 { x: 0.0, y: 0.0 },
+        r1: Vec2 { x: 0.0, y: 0.0 },
+    };
+
     pub fn new(r0c0: Real, r0c1: Real,
                r1c0: Real, r1c1: Real) -> Self {
-        Self::new_from_vec2s(Vec2::new(r0c0, r0c1),
-                             Vec2::new(r1c0, r1c1))
+        Mat2 {
+            r0: Vec2 { x: r0c0, y: r0c1 },
+            r1: Vec2 { x: r1c0, y: r1c1 },
+        }
     }
 
     pub fn new_from_vec2s(r0: Vec2, r1: Vec2) -> Self {
@@ -25,11 +37,6 @@ impl Mat2 {
 
     pub fn new_from_arrs(r0: [Real; 2], r1: [Real; 2]) -> Self {
         Self::new_from_vec2s(Vec2::from(r0), Vec2::from(r1))
-    }
-
-    pub fn identity() -> Self {
-        Self::new(1.0, 0.0,
-                  0.0, 1.0)
     }
 
     pub fn determinant(&self) -> Real {
@@ -72,6 +79,7 @@ impl Mul<Mat2> for Mat2 {
 
     fn mul(self, rhs: Mat2) -> Self::Output {
         let rhs = rhs.transpose();
+
         Mat2::new(Vec2::dot(self.r0, rhs.r0), Vec2::dot(self.r0, rhs.r1),
                   Vec2::dot(self.r1, rhs.r0), Vec2::dot(self.r1, rhs.r1))
     }
@@ -162,7 +170,7 @@ impl fmt::Display for Mat2 {
 
 impl Default for Mat2 {
     fn default() -> Self {
-        Mat2::identity()
+        Mat2::IDENTITY
     }
 }
 

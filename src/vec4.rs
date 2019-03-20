@@ -13,17 +13,15 @@ pub struct Vec4 {
 }
 
 impl Vec4 {
-    //Build a new vector4 from 4 scalar (floating point) components
+    pub const ZERO: Vec4 = Vec4 { x: 0.0, y: 0.0, z: 0.0, w: 0.0 };
+    pub const ONE: Vec4 = Vec4 { x: 1.0, y: 1.0, z: 1.0, w: 1.0 };
+    pub const RIGHT: Vec4 = Vec4 { x: 1.0, y: 0.0, z: 0.0, w: 0.0 };
+    pub const UP: Vec4 = Vec4 { x: 0.0, y: 1.0, z: 0.0, w: 0.0 };
+    pub const FORWARD: Vec4 = Vec4 { x: 0.0, y: 0.0, z: 1.0, w: 0.0 };
+    pub const W_ONLY: Vec4 = Vec4 { x: 0.0, y: 0.0, z: 0.0, w: 1.0 };
+
     pub fn new(x: Real, y: Real, z: Real, w: Real) -> Vec4 {
         Vec4 { x, y, z, w }
-    }
-
-    pub fn zero() -> Vec4 {
-        Vec4 { x: 0.0, y: 0.0, z: 0.0, w: 0.0 }
-    }
-
-    pub fn one() -> Vec4 {
-        Vec4 { x: 1.0, y: 1.0, z: 1.0, w: 1.0 }
     }
 
     pub fn all(t: Real) -> Vec4 {
@@ -38,7 +36,6 @@ impl Vec4 {
         Vec4::dot(*self, *self)
     }
 
-    //Returns the euclidean distance of the vector
     pub fn length(&self) -> Real {
         self.length_squared().sqrt()
     }
@@ -46,7 +43,6 @@ impl Vec4 {
     pub fn is_unit(&self) -> bool {
         self.length_squared().approx_eq(1.0, DEF_F32_EPSILON)
     }
-
 
     pub fn size() -> usize {
         4
@@ -299,7 +295,7 @@ impl From<(Real, Vec2, Real)> for Vec4 {
 
 impl Default for Vec4 {
     fn default() -> Self {
-        Vec4::zero()
+        Vec4::ZERO
     }
 }
 

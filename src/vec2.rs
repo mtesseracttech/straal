@@ -15,28 +15,17 @@ pub struct Vec2 {
 }
 
 impl Vec2 {
+    pub const ZERO: Vec2 = Vec2 { x: 0.0, y: 0.0 };
+    pub const ONE: Vec2 = Vec2 { x: 1.0, y: 1.0 };
+    pub const RIGHT: Vec2 = Vec2 { x: 1.0, y: 0.0 };
+    pub const UP: Vec2 = Vec2 { x: 0.0, y: 1.0 };
+
     pub fn new(x: Real, y: Real) -> Vec2 {
         Vec2 { x, y }
     }
 
-    pub fn zero() -> Vec2 {
-        Vec2 { x: 0.0, y: 0.0 }
-    }
-
-    pub fn one() -> Vec2 {
-        Vec2 { x: 1.0, y: 1.0 }
-    }
-
     pub fn all(t: Real) -> Vec2 {
         Vec2 { x: t, y: t }
-    }
-
-    pub fn right() -> Vec2 {
-        Self::new(1.0, 0.0)
-    }
-
-    pub fn up() -> Vec2 {
-        Self::new(0.0, 1.0)
     }
 
     pub fn dot(lhs: Vec2, rhs: Vec2) -> Real {
@@ -227,7 +216,7 @@ impl From<Vec4> for Vec2 {
 
 impl Default for Vec2 {
     fn default() -> Self {
-        Vec2::zero()
+        Vec2::ZERO
     }
 }
 

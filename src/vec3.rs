@@ -12,42 +12,30 @@ pub struct Vec3 {
 }
 
 impl Vec3 {
+    pub const ZERO: Vec3 = Vec3 { x: 0.0, y: 0.0, z: 0.0 };
+    pub const ONE: Vec3 = Vec3 { x: 1.0, y: 1.0, z: 1.0 };
+    pub const RIGHT: Vec3 = Vec3 { x: 1.0, y: 0.0, z: 0.0 };
+    pub const UP: Vec3 = Vec3 { x: 0.0, y: 1.0, z: 0.0 };
+    pub const FORWARD: Vec3 = Vec3 { x: 0.0, y: 0.0, z: 1.0 };
+
     pub fn new(x: Real, y: Real, z: Real) -> Vec3 {
         Vec3 { x, y, z }
-    }
-
-    pub fn zero() -> Vec3 {
-        Vec3 { x: 0.0, y: 0.0, z: 0.0 }
-    }
-
-    pub fn one() -> Vec3 {
-        Vec3 { x: 1.0, y: 1.0, z: 1.0 }
     }
 
     pub fn all(t: Real) -> Vec3 {
         Vec3 { x: t, y: t, z: t }
     }
 
-    pub fn up() -> Vec3 {
-        Self::new(0.0, 1.0, 0.0)
-    }
-
-    pub fn right() -> Vec3 {
-        Self::new(1.0, 0.0, 0.0)
-    }
-
-    pub fn forward() -> Vec3 {
-        Self::new(0.0, 0.0, 1.0)
-    }
-
     pub fn dot(lhs: Vec3, rhs: Vec3) -> Real {
         lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z
     }
 
-    pub fn cross(lhs: Vec3, rhs: Vec3) -> Self {
-        Self::new(lhs.y * rhs.z - lhs.z * rhs.y,
-                  lhs.z * rhs.x - lhs.x * rhs.z,
-                  lhs.x * rhs.y - lhs.y * rhs.x)
+    pub fn cross(lhs: Vec3, rhs: Vec3) -> Vec3 {
+        Vec3 {
+            x: lhs.y * rhs.z - lhs.z * rhs.y,
+            y: lhs.z * rhs.x - lhs.x * rhs.z,
+            z: lhs.x * rhs.y - lhs.y * rhs.x,
+        }
     }
 
     pub fn length_squared(&self) -> Real {
@@ -68,7 +56,11 @@ impl Vec3 {
 
     pub fn normalized(&self) -> Vec3 {
         let scale = 1.0 / self.length();
-        Self::new(self.x * scale, self.y * scale, self.z * scale)
+        Vec3 {
+            x: self.x,
+            y: self.y,
+            z: self.z,
+        } * scale
     }
 
     pub fn normalize(&mut self) {
@@ -232,20 +224,42 @@ impl fmt::Display for Vec3 {
 }
 
 impl From<(Real, Real, Real)> for Vec3 {
-    fn from(tuple: (Real, Real, Real)) -> Self { Self::new(tuple.0, tuple.1, tuple.2) }
+    fn from(tuple: (Real, Real, Real)) -> Self {
+        Vec3 {
+            x: tuple.0,
+            y: tuple.1,
+            z: tuple.2,
+        }
+    }
 }
 
 impl From<[f32; 3]> for Vec3 {
-    fn from(arr: [f32; 3]) -> Self { Self::new(arr[0], arr[1], arr[2]) }
+    fn from(arr: [f32; 3]) -> Self {
+        Vec3 {
+            x: arr[0],
+            y: arr[1],
+            z: arr[2],
+        }
+    }
 }
 
 impl From<Vec2> for Vec3 {
-    fn from(vec2: Vec2) -> Self { Self::new(vec2.x, vec2.y, 0.0) }
+    fn from(vec2: Vec2) -> Self {
+        Vec3 {
+            x: vec2.x,
+            y: vec2.y,
+            z: 0.0,
+        }
+    }
 }
 
 impl From<(Real, Vec2)> for Vec3 {
     fn from(other: (Real, Vec2)) -> Self {
-        Self::new(other.0, other.1.x, other.1.y)
+        Vec3 {
+            x: other.0,
+            y: other.1.x,
+            z: other.1.y,
+        }
     }
 }
 
@@ -261,7 +275,7 @@ impl From<Vec4> for Vec3 {
 
 impl Default for Vec3 {
     fn default() -> Self {
-        Vec3::zero()
+        Vec3::ZERO
     }
 }
 

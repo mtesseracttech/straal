@@ -15,30 +15,40 @@ pub struct Mat4 {
 }
 
 impl Mat4 {
+    pub const IDENTITY: Mat4 = Mat4 {
+        r0: Vec4 { x: 1.0, y: 0.0, z: 0.0, w: 0.0 },
+        r1: Vec4 { x: 0.0, y: 1.0, z: 0.0, w: 0.0 },
+        r2: Vec4 { x: 0.0, y: 0.0, z: 1.0, w: 0.0 },
+        r3: Vec4 { x: 0.0, y: 0.0, z: 0.0, w: 1.0 },
+    };
+
+    pub const EMPTY: Mat4 = Mat4 {
+        r0: Vec4 { x: 0.0, y: 0.0, z: 0.0, w: 0.0 },
+        r1: Vec4 { x: 0.0, y: 0.0, z: 0.0, w: 0.0 },
+        r2: Vec4 { x: 0.0, y: 0.0, z: 0.0, w: 0.0 },
+        r3: Vec4 { x: 0.0, y: 0.0, z: 0.0, w: 0.0 },
+    };
+
     pub fn new(r0c0: Real, r0c1: Real, r0c2: Real, r0c3: Real,
                r1c0: Real, r1c1: Real, r1c2: Real, r1c3: Real,
                r2c0: Real, r2c1: Real, r2c2: Real, r2c3: Real,
-               r3c0: Real, r3c1: Real, r3c2: Real, r3c3: Real) -> Self {
-        Self::new_from_vec4s(Vec4::new(r0c0, r0c1, r0c2, r0c3),
-                             Vec4::new(r1c0, r1c1, r1c2, r1c3),
-                             Vec4::new(r2c0, r2c1, r2c2, r2c3),
-                             Vec4::new(r3c0, r3c1, r3c2, r3c3))
+               r3c0: Real, r3c1: Real, r3c2: Real, r3c3: Real) -> Mat4 {
+        Mat4 {
+            r0: Vec4 { x: r0c0, y: r0c1, z: r0c2, w: r0c3 },
+            r1: Vec4 { x: r1c0, y: r1c1, z: r1c2, w: r1c3 },
+            r2: Vec4 { x: r2c0, y: r2c1, z: r2c2, w: r2c3 },
+            r3: Vec4 { x: r3c0, y: r3c1, z: r3c2, w: r3c3 },
+        }
     }
 
-    pub fn new_from_vec4s(r0: Vec4, r1: Vec4, r2: Vec4, r3: Vec4) -> Self {
+    pub fn new_from_vec4s(r0: Vec4, r1: Vec4, r2: Vec4, r3: Vec4) -> Mat4 {
         Mat4 { r0, r1, r2, r3 }
     }
 
-    pub fn new_from_arrs(r0: [Real; 4], r1: [Real; 4], r2: [Real; 4], r3: [Real; 4]) -> Self {
+    pub fn new_from_arrs(r0: [Real; 4], r1: [Real; 4], r2: [Real; 4], r3: [Real; 4]) -> Mat4 {
         Self::new_from_vec4s(Vec4::from(r0), Vec4::from(r1), Vec4::from(r2), Vec4::from(r3))
     }
 
-    pub fn identity() -> Self {
-        Self::new(1.0, 0.0, 0.0, 0.0,
-                  0.0, 1.0, 0.0, 0.0,
-                  0.0, 0.0, 1.0, 0.0,
-                  0.0, 0.0, 0.0, 1.0)
-    }
 
     pub fn determinant(&self) -> Real {
         //https://github.com/g-truc/glm/blob/7590260cf81f3e49f492e992f60dd88cd3265d14/glm/detail/func_matrix.inl#L222
@@ -107,8 +117,8 @@ impl Mat4 {
     }
 
     //This version does not use the adjoint and determinant functions, because they share a bunch of calculations
-    //that are best left un-abstracted for matrices of this size and up (for reduced memory usage, less redundant computation and potential compiler optimizations)
-    pub fn inverse(&self) -> Self {
+//that are best left un-abstracted for matrices of this size and up (for reduced memory usage, less redundant computation and potential compiler optimizations)
+    pub fn inverse(&self) -> Mat4 {
         //Pre-calculating sub-factors, since all of them are used 4 times
         let sf00 = self[2][2] * self[3][3] - self[3][2] * self[2][3];
         let sf01 = self[2][1] * self[3][3] - self[3][1] * self[2][3];
@@ -154,11 +164,15 @@ impl Mat4 {
 
         let det = self[0][0] * adj[0][0] + self[1][0] * adj[0][1] + self[2][0] * adj[0][2] + self[3][0] * adj[0][3];
 
-        adj / det
+        if det.approx_eq(0.0, DEF_F32_EPSILON) {
+            adj / det
+        } else {
+            Mat4::IDENTITY
+        }
     }
 
     //Transposes the matrix (swaps the elements over the diagonal)
-    pub fn transpose(&self) -> Self {
+    pub fn transpose(&self) -> Mat4 {
         Self::new(self[0][0], self[1][0], self[2][0], self[3][0],
                   self[0][1], self[1][1], self[2][1], self[3][1],
                   self[0][2], self[1][2], self[2][2], self[3][2],
@@ -190,12 +204,12 @@ impl Mat4 {
         Self::from(Mat3::get_angle_axis(n, theta))
     }
 
-    pub fn get_translation_mat(trans: Vec3) -> Mat4 {
-        let mut t_mat = Self::identity();
-        t_mat[0][3] = trans.x;
-        t_mat[1][3] = trans.y;
-        t_mat[2][3] = trans.z;
-        t_mat
+    pub fn get_translation_mat(pos: Vec3) -> Mat4 {
+        let mut trans = Mat4::IDENTITY;
+        trans[0][3] = pos.x;
+        trans[1][3] = pos.y;
+        trans[2][3] = pos.z;
+        trans
     }
 
     pub fn translate(&mut self, trans: Vec3) {
@@ -355,7 +369,7 @@ impl From<Mat3> for Mat4 {
 
 impl Default for Mat4 {
     fn default() -> Self {
-        Mat4::identity()
+        Mat4::IDENTITY
     }
 }
 

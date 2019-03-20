@@ -11,17 +11,15 @@ pub struct Quat {
 }
 
 impl Quat {
+    pub const IDENTITY: Quat = Quat {
+        w: 1.0,
+        v: Vec3::ZERO,
+    };
+
     pub fn new(w: Real, x: Real, y: Real, z: Real) -> Quat {
         Quat {
             w,
             v: Vec3 { x, y, z },
-        }
-    }
-
-    pub fn identity() -> Quat {
-        Quat {
-            w: 1.0,
-            v: Vec3::zero(),
         }
     }
 
@@ -458,7 +456,7 @@ impl From<Mat3> for Quat {
                 }
             }
             _ => {
-                Quat::identity()
+                Quat::IDENTITY
             }
         }
     }
@@ -466,6 +464,6 @@ impl From<Mat3> for Quat {
 
 impl Default for Quat {
     fn default() -> Self {
-        Quat::identity()
+        Quat::IDENTITY
     }
 }
