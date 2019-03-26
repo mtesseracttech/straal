@@ -179,58 +179,58 @@ impl<S> Quat<S> where S: num::Float + DefaultEpsilon<S> {
         }
     }
 
-//    pub fn get_euler_angles_obj_upr_deg(self) -> Vec3<S> {
-//        self.get_euler_angles_obj_upr_rad() * S::one().to_degrees()
-//    }
-//
-//    pub fn get_euler_angles_obj_upr_rad(self) -> Vec3<S> {
-//        let min_two = S::one() * -2;
-//        let half = S::one() / 2;
-//        let lim_1 = S::one() * 0.9999;
-//
-//        let sin_pitch = min_two * (self.v.y * self.v.z - self.w * self.v.x);
-//
-//        if sin_pitch.abs() > lim_1 {
-//            Vec3 {
-//                x: num::cast(std::f64::consts::FRAC_PI_2).unwrap() * sin_pitch,
-//                y: (-self.v.x * self.v.z + self.w * self.v.y).atan2(half - self.v.y * self.v.y - self.v.z * self.v.z),
-//                z: S::zero(),
-//            }
-//        } else {
-//            Vec3 {
-//                x: sin_pitch.asin(),
-//                y: (self.v.x * self.v.z + self.w * self.v.y).atan2(half - self.v.x * self.v.x - self.v.y * self.v.y),
-//                z: (self.v.x * self.v.y + self.w * self.v.z).atan2(half - self.v.x * self.v.x - self.v.z * self.v.z),
-//            }
-//        }
-//    }
-//
-//
-//    pub fn get_euler_angles_upr_obj_deg(self) -> Vec3<S> {
-//        self.get_euler_angles_upr_obj_rad() * S::one().to_degrees()
-//    }
-//
-//    pub fn get_euler_angles_upr_obj_rad(self) -> Vec3<S> {
-//        let min_two = S::one() * -2;
-//        let half = S::one() / 2;
-//        let lim_1 = S::one() * 0.9999;
-//
-//        let sin_pitch = min_two * (self.v.y * self.v.z + self.w * self.v.x);
-//
-//        if sin_pitch.abs() > lim_1 {
-//            Vec3 {
-//                x: num::cast(std::f64::consts::FRAC_PI_2).unwrap() * sin_pitch,
-//                y: (-self.v.x * self.v.z - self.w * self.v.y).atan2(half - self.v.y * self.v.y - self.v.z * self.v.z),
-//                z: S::zero(),
-//            }
-//        } else {
-//            Vec3 {
-//                x: sin_pitch.asin(),
-//                y: (self.v.x * self.v.z - self.w * self.v.y).atan2(half - self.v.x * self.v.x - self.v.y * self.v.y),
-//                z: (self.v.x * self.v.y - self.w * self.v.z).atan2(half - self.v.x * self.v.x - self.v.z * self.v.z),
-//            }
-//        }
-//    }
+    pub fn get_euler_angles_obj_upr_deg(&self) -> Vec3<S> {
+        self.get_euler_angles_obj_upr_rad() * S::one().to_degrees()
+    }
+
+    pub fn get_euler_angles_obj_upr_rad(&self) -> Vec3<S> {
+        let min_two: S = num::cast(-2).unwrap();
+        let half: S = num::cast(0.5).unwrap();
+        let almost_one: S = num::cast(0.9999).unwrap();
+        let half_pi: S = num::cast(std::f64::consts::FRAC_PI_2).unwrap();
+        let sin_pitch: S = min_two * (self.v.y * self.v.z - self.w * self.v.x);
+
+        if sin_pitch.abs() > almost_one {
+            Vec3 {
+                x: half_pi * sin_pitch,
+                y: (-self.v.x * self.v.z + self.w * self.v.y).atan2(half - self.v.y * self.v.y - self.v.z * self.v.z),
+                z: S::zero(),
+            }
+        } else {
+            Vec3 {
+                x: sin_pitch.asin(),
+                y: (self.v.x * self.v.z + self.w * self.v.y).atan2(half - self.v.x * self.v.x - self.v.y * self.v.y),
+                z: (self.v.x * self.v.y + self.w * self.v.z).atan2(half - self.v.x * self.v.x - self.v.z * self.v.z),
+            }
+        }
+    }
+
+
+    pub fn get_euler_angles_upr_obj_deg(self) -> Vec3<S> {
+        self.get_euler_angles_upr_obj_rad() * S::one().to_degrees()
+    }
+
+    pub fn get_euler_angles_upr_obj_rad(self) -> Vec3<S> {
+        let min_two: S = num::cast(-2).unwrap();
+        let half: S = num::cast(0.5).unwrap();
+        let almost_one: S = num::cast(0.9999).unwrap();
+        let half_pi: S = num::cast(std::f64::consts::FRAC_PI_2).unwrap();
+        let sin_pitch: S = min_two * (self.v.y * self.v.z + self.w * self.v.x);
+
+        if sin_pitch.abs() > almost_one {
+            Vec3 {
+                x: half_pi * sin_pitch,
+                y: (-self.v.x * self.v.z - self.w * self.v.y).atan2(half - self.v.y * self.v.y - self.v.z * self.v.z),
+                z: S::zero(),
+            }
+        } else {
+            Vec3 {
+                x: sin_pitch.asin(),
+                y: (self.v.x * self.v.z - self.w * self.v.y).atan2(half - self.v.x * self.v.x - self.v.y * self.v.y),
+                z: (self.v.x * self.v.y - self.w * self.v.z).atan2(half - self.v.x * self.v.x - self.v.z * self.v.z),
+            }
+        }
+    }
 
     //Performs a rotation around an arbitary unit axis
     pub fn get_quat_from_angle_axis(theta: S, n: Vec3<S>) -> Quat<S> {
