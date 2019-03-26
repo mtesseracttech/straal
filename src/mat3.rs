@@ -1,35 +1,38 @@
 use std::fmt;
+use std::fmt::Display;
 use std::ops::*;
 
 use super::*;
 
-//going with row-major, since column major is the absolute worst to work with.
-
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
-pub struct Mat3 {
-    pub r0: Vec3,
-    pub r1: Vec3,
-    pub r2: Vec3,
+pub struct Mat3<S> {
+    pub r0: Vec3<S>,
+    pub r1: Vec3<S>,
+    pub r2: Vec3<S>,
 }
 
-impl Mat3 {
-    pub const IDENTITY: Mat3 = Mat3 {
-        r0: Vec3 { x: 1.0, y: 0.0, z: 0.0 },
-        r1: Vec3 { x: 0.0, y: 1.0, z: 0.0 },
-        r2: Vec3 { x: 0.0, y: 0.0, z: 1.0 },
-    };
 
-    pub const EMPTY: Mat3 = Mat3 {
-        r0: Vec3 { x: 0.0, y: 0.0, z: 0.0 },
-        r1: Vec3 { x: 0.0, y: 0.0, z: 0.0 },
-        r2: Vec3 { x: 0.0, y: 0.0, z: 0.0 },
-    };
+impl<S> Mat3<S> where S: num::Float + DefaultEpsilon<S> {
+    pub fn identity() -> Mat3<S> {
+        Mat3 {
+            r0: Vec3 { x: S::one(), y: S::zero(), z: S::zero() },
+            r1: Vec3 { x: S::zero(), y: S::one(), z: S::zero() },
+            r2: Vec3 { x: S::zero(), y: S::zero(), z: S::one() },
+        }
+    }
 
+    pub fn empty() -> Mat3<S> {
+        Mat3 {
+            r0: Vec3::zero(),
+            r1: Vec3::zero(),
+            r2: Vec3::zero(),
+        }
+    }
 
-    pub fn new(r0c0: Real, r0c1: Real, r0c2: Real,
-               r1c0: Real, r1c1: Real, r1c2: Real,
-               r2c0: Real, r2c1: Real, r2c2: Real, ) -> Self {
+    pub fn new(r0c0: S, r0c1: S, r0c2: S,
+               r1c0: S, r1c1: S, r1c2: S,
+               r2c0: S, r2c1: S, r2c2: S, ) -> Mat3<S> {
         Mat3 {
             r0: Vec3 { x: r0c0, y: r0c1, z: r0c2 },
             r1: Vec3 { x: r1c0, y: r1c1, z: r1c2 },
@@ -37,58 +40,102 @@ impl Mat3 {
         }
     }
 
-    pub fn new_from_vec3s(r0: Vec3, r1: Vec3, r2: Vec3) -> Self {
+    pub fn new_from_vec3s(r0: Vec3<S>, r1: Vec3<S>, r2: Vec3<S>) -> Mat3<S> {
         Mat3 { r0, r1, r2 }
     }
 
-    pub fn new_from_arrs(r0: [Real; 3], r1: [Real; 3], r2: [Real; 3]) -> Self {
-        Self::new_from_vec3s(Vec3::from(r0), Vec3::from(r1), Vec3::from(r2))
+    pub fn new_from_arrs(r0: [S; 3], r1: [S; 3], r2: [S; 3]) -> Mat3<S> {
+        Mat3 {
+            r0: Vec3::from(r0),
+            r1: Vec3::from(r1),
+            r2: Vec3::from(r2),
+        }
     }
 
-    pub fn identity() -> Self {
-        Self::new(1.0, 0.0, 0.0,
-                  0.0, 1.0, 0.0,
-                  0.0, 0.0, 1.0)
-    }
-
-    pub fn determinant(&self) -> Real {
+    pub fn determinant(&self) -> S {
         self[0][0] * (self[1][1] * self[2][2] - self[2][1] * self[1][2]) -
             self[1][0] * (self[0][1] * self[2][2] - self[2][1] * self[0][2]) +
             self[2][0] * (self[0][1] * self[1][2] - self[1][1] * self[0][2])
     }
 
-    pub fn adjoint(&self) -> Mat3 {
-        let r0 = Vec3::new(self[1][1] * self[2][2] - self[1][2] * self[2][1],
-                           -(self[0][1] * self[2][2] - self[0][2] * self[2][1]),
-                           self[0][1] * self[1][2] - self[0][2] * self[1][1]);
-        let r1 = Vec3::new(-(self[1][0] * self[2][2] - self[1][2] * self[2][0]),
-                           self[0][0] * self[2][2] - self[0][2] * self[2][0],
-                           -(self[0][0] * self[1][2] - self[0][2] * self[1][0]));
-        let r2 = Vec3::new(self[1][0] * self[2][1] - self[1][1] * self[2][0],
-                           -(self[0][0] * self[2][1] - self[0][1] * self[2][0]),
-                           self[0][0] * self[1][1] - self[0][1] * self[1][0]);
-
-        Self::new_from_vec3s(r0, r1, r2)
-    }
-
-    pub fn inverse(&self) -> Mat3 {
-        let det = self.determinant();
-        if det.approx_eq(0.0, DEF_F32_EPSILON) {
-            self.adjoint() / det
-        } else {
-            Mat3::IDENTITY
+    pub fn adjoint(&self) -> Mat3<S> {
+        Mat3 {
+            r0: Vec3 {
+                x: self[1][1] * self[2][2] - self[1][2] * self[2][1],
+                y: -(self[0][1] * self[2][2] - self[0][2] * self[2][1]),
+                z: self[0][1] * self[1][2] - self[0][2] * self[1][1],
+            },
+            r1: Vec3 {
+                x: -(self[1][0] * self[2][2] - self[1][2] * self[2][0]),
+                y: self[0][0] * self[2][2] - self[0][2] * self[2][0],
+                z: -(self[0][0] * self[1][2] - self[0][2] * self[1][0]),
+            },
+            r2: Vec3 {
+                x: self[1][0] * self[2][1] - self[1][1] * self[2][0],
+                y: -(self[0][0] * self[2][1] - self[0][1] * self[2][0]),
+                z: self[0][0] * self[1][1] - self[0][1] * self[1][0],
+            },
         }
     }
 
-    pub fn transpose(&self) -> Self {
-        Self::new(self[0][0], self[1][0], self[2][0],
-                  self[0][1], self[1][1], self[2][1],
-                  self[0][2], self[1][2], self[2][2])
+    pub fn inverse(&self) -> Mat3<S> {
+        self.adjoint() / self.determinant()
     }
 
+    pub fn transpose(&self) -> Mat3<S> {
+        Mat3 {
+            r0: Vec3 { x: self[0][0], y: self[1][0], z: self[2][0] },
+            r1: Vec3 { x: self[0][1], y: self[1][1], z: self[2][1] },
+            r2: Vec3 { x: self[0][2], y: self[1][2], z: self[2][2] },
+        }
+    }
+
+    pub fn get_rotation_mat_flex_euler_deg(angles: Vec3<S>, order: RotationOrder) -> Mat3<S> {
+        Mat3::get_rotation_mat_flex_euler_rad(angles * S::to_radians(S::one()), order)
+    }
+
+    pub fn get_rotation_mat_flex_euler_rad(angles: Vec3<S>, order: RotationOrder) -> Mat3<S> {
+        let sin_pitch = angles.x.sin();
+        let cos_pitch = angles.x.cos();
+        let sin_heading = angles.y.sin();
+        let cos_heading = angles.y.cos();
+        let sin_bank = angles.z.sin();
+        let cos_bank = angles.z.cos();
+
+        let p = Mat3 {
+            r0: Vec3 { x: S::one(), y: S::zero(), z: S::zero() },
+            r1: Vec3 { x: S::zero(), y: cos_pitch, z: sin_pitch },
+            r2: Vec3 { x: S::zero(), y: -sin_pitch, z: cos_pitch },
+        };
+
+        let h = Mat3 {
+            r0: Vec3 { x: cos_heading, y: S::zero(), z: -sin_heading },
+            r1: Vec3 { x: S::zero(), y: S::one(), z: S::zero() },
+            r2: Vec3 { x: sin_heading, y: S::zero(), z: cos_heading },
+        };
+
+        let b = Mat3 {
+            r0: Vec3 { x: cos_bank, y: sin_bank, z: S::zero() },
+            r1: Vec3 { x: -sin_bank, y: cos_bank, z: S::zero() },
+            r2: Vec3 { x: S::zero(), y: S::zero(), z: S::one() },
+        };
+
+        match order {
+            RotationOrder::PHB => p * h * b,
+            RotationOrder::PBH => p * b * h,
+            RotationOrder::HPB => h * p * b,
+            RotationOrder::HBP => b * b * p,
+            RotationOrder::BPH => b * p * h,
+            RotationOrder::BHP => b * h * p,
+        }
+    }
+
+    pub fn get_rotation_mat_euler_upr_obj_deg(pitch: S, heading: S, bank: S) -> Mat3<S> {
+        Mat3::get_rotation_mat_euler_upr_obj_rad(pitch.to_radians(), heading.to_radians(), bank.to_radians())
+    }
 
     //Performs a rotation around the cardinal axes, in the order BPH (handy for camera rotation)
-    pub fn get_rotation_mat_euler_upr_obj_rad(pitch: Real, heading: Real, bank: Real) -> Mat3 {
+    pub fn get_rotation_mat_euler_upr_obj_rad(pitch: S, heading: S, bank: S) -> Mat3<S> {
         let sp = pitch.sin();
         let cp = pitch.cos();
         let sh = heading.sin();
@@ -96,17 +143,19 @@ impl Mat3 {
         let sb = bank.sin();
         let cb = bank.cos();
 
-        Self::new(ch * cb + sh * sp * sb, sb * cp, -sh * cb + ch * sp * sb,
-                  -ch * sb + sh * sp * cb, cb * cp, sb * sh + ch * sp * cb,
-                  sh * cp, -sp, ch * cp)
+        Mat3 {
+            r0: Vec3 { x: ch * cb + sh * sp * sb, y: sb * cp, z: -sh * cb + ch * sp * sb },
+            r1: Vec3 { x: -ch * sb + sh * sp * cb, y: cb * cp, z: sb * sh + ch * sp * cb },
+            r2: Vec3 { x: sh * cp, y: -sp, z: ch * cp },
+        }
     }
 
-    pub fn get_rotation_mat_euler_upr_obj_deg(pitch: Real, heading: Real, bank: Real) -> Mat3 {
-        Self::get_rotation_mat_euler_upr_obj_rad(pitch.to_radians(), heading.to_radians(), bank.to_radians())
+    pub fn get_rotation_mat_euler_obj_upr_deg(pitch: S, heading: S, bank: S) -> Mat3<S> {
+        Mat3::get_rotation_mat_euler_obj_upr_rad(pitch.to_radians(), heading.to_radians(), bank.to_radians())
     }
 
     //Performs a rotation around the cardinal axes, in the order HPB
-    pub fn get_rotation_mat_euler_obj_upr_rad(pitch: Real, heading: Real, bank: Real) -> Mat3 {
+    pub fn get_rotation_mat_euler_obj_upr_rad(pitch: S, heading: S, bank: S) -> Mat3<S> {
         let sp = pitch.sin();
         let cp = pitch.cos();
         let sh = heading.sin();
@@ -114,34 +163,33 @@ impl Mat3 {
         let sb = bank.sin();
         let cb = bank.cos();
 
-        Self::new(ch * cb + sh * sp * sb, -ch * sb + sh * sp * cb, sh * cp,
-                  sb * cp, cb * cp, -sp,
-                  -sh * cb + ch * sp * sb, sb * sh + ch * sp * cb, ch * cp)
+        Mat3 {
+            r0: Vec3 { x: ch * cb + sh * sp * sb, y: -ch * sb + sh * sp * cb, z: sh * cp },
+            r1: Vec3 { x: sb * cp, y: cb * cp, z: -sp },
+            r2: Vec3 { x: -sh * cb + ch * sp * sb, y: sb * sh + ch * sp * cb, z: ch * cp },
+        }
     }
 
-    pub fn get_rotation_mat_euler_obj_upr_deg(pitch: Real, heading: Real, bank: Real) -> Mat3 {
-        Self::get_rotation_mat_euler_obj_upr_rad(pitch.to_radians(), heading.to_radians(), bank.to_radians())
+    pub fn get_euler_angles_obj_upr_deg(&self) -> Vec3<S> {
+        self.get_euler_angles_obj_upr_rad() * S::one().to_degrees()
     }
 
-
-    pub fn get_euler_angles_obj_upr(&self) -> Vec3 {
-        let mut angles = Vec3::ZERO;
-
+    pub fn get_euler_angles_obj_upr_rad(&self) -> Vec3<S> {
         let sp = -self[2][1];
-        let pitch = if sp <= -1.0 {
-            -std::f32::consts::FRAC_PI_2
-        } else if sp >= 1.0 {
-            std::f32::consts::FRAC_PI_2
+        let pitch = if sp <= -S::one() {
+            -S::from(std::f64::consts::FRAC_PI_2).unwrap()
+        } else if sp >= S::one() {
+            S::from(std::f64::consts::FRAC_PI_2).unwrap()
         } else {
             sp.asin()
         };
 
-        let mut bank = 0.0;
-        let mut heading = 0.0;
+        let mut bank = S::zero();
+        let mut heading = S::zero();
 
-        if sp.abs() > 0.9999 {
+        if sp.abs() > S::from(0.9999).unwrap() {
             heading = -self[0][2].atan2(self[0][0]);
-            bank = 0.0;
+            bank = S::zero();
         } else {
             heading = self[0][2].atan2(self[2][2]);
             bank = self[0][1].atan2(self[1][1]);
@@ -153,127 +201,89 @@ impl Mat3 {
         }
     }
 
-    //Rotates the matrix around an arbitrary axis
-    pub fn rotate_around(&mut self, n: Vec3, theta: Real) {
-        *self *= Self::get_angle_axis(n, theta);
+    //TODO: get euler angles upr obj
+
+    pub fn get_angle_axis_mat_deg(n: Vec3<S>, theta: S) -> Mat3<S> {
+        Mat3::get_angle_axis_mat_rad(n, theta.to_radians())
     }
 
     //Performs a rotation around an arbitary unit axis
-    pub fn get_angle_axis(n: Vec3, theta: Real) -> Mat3 {
+    pub fn get_angle_axis_mat_rad(n: Vec3<S>, theta: S) -> Mat3<S> {
         debug_assert!(n.is_unit());
         let ct = theta.cos();
         let st = theta.sin();
-        let p_cos = 1.0 - ct; //1.0 - cos(theta), so basically a cosine from 0 to 2
+        let p_cos = S::one() - ct; //1.0 - cos(theta), so basically a cosine from 0 to 2
 
-        Self::new(n.x * n.x * p_cos + ct, n.x * n.y * p_cos + n.z * st, n.x * n.z * p_cos - n.y * st,
-                  n.x * n.y * p_cos - n.z * st, n.y * n.y * p_cos + ct, n.y * n.z * p_cos + n.x * st,
-                  n.x * n.z * p_cos + n.y * st, n.y * n.z * p_cos - n.x * st, n.z * n.z * p_cos + ct)
-    }
-
-    pub fn scale(&mut self, factors: Vec3) {
-        *self *= Self::get_scale_mat(factors);
-    }
-
-    pub fn get_scale_mat(factors: Vec3) -> Mat3 {
-        Self::new(factors.x, 0.0, 0.0,
-                  0.0, factors.y, 0.0,
-                  0.0, 0.0, factors.z)
-    }
-
-    pub fn get_scale_along_axis(n: Vec3, s: Real) -> Mat3 {
-        debug_assert!(n.is_unit());
-
-        let s_min_one = s - 1.0;
-
-        Self::new(1.0 + s_min_one * n.x * n.x, s_min_one * n.x * n.y, s_min_one * n.x * n.z,
-                  s_min_one * n.x * n.y, 1.0 + s_min_one * n.y * n.y, s_min_one * n.y * n.z,
-                  s_min_one * n.x * n.z, s_min_one * n.z * n.y, 1.0 + s_min_one * n.z * n.z)
-    }
-}
-
-impl Not for Mat3 {
-    type Output = Mat3;
-
-    fn not(self) -> Self::Output {
-        self.inverse()
-    }
-}
-
-impl Mul<Mat3> for Mat3 {
-    type Output = Mat3;
-
-    fn mul(self, rhs: Mat3) -> Self::Output {
-        let rhs = rhs.transpose();
-        Mat3::new(Vec3::dot(self[0], rhs[0]), Vec3::dot(self[0], rhs[1]), Vec3::dot(self[0], rhs[2]),
-                  Vec3::dot(self[1], rhs[0]), Vec3::dot(self[1], rhs[1]), Vec3::dot(self[1], rhs[2]),
-                  Vec3::dot(self[2], rhs[0]), Vec3::dot(self[2], rhs[1]), Vec3::dot(self[2], rhs[2]))
-    }
-}
-
-impl Mul<Vec3> for Mat3 {
-    type Output = Vec3;
-
-    fn mul(self, rhs: Vec3) -> Self::Output {
-        Vec3 {
-            x: Vec3::dot(self.r0, rhs),
-            y: Vec3::dot(self.r1, rhs),
-            z: Vec3::dot(self.r2, rhs),
+        Mat3 {
+            r0: Vec3 { x: n.x * n.x * p_cos + ct, y: n.x * n.y * p_cos + n.z * st, z: n.x * n.z * p_cos - n.y * st },
+            r1: Vec3 { x: n.x * n.y * p_cos - n.z * st, y: n.y * n.y * p_cos + ct, z: n.y * n.z * p_cos + n.x * st },
+            r2: Vec3 { x: n.x * n.z * p_cos + n.y * st, y: n.y * n.z * p_cos - n.x * st, z: n.z * n.z * p_cos + ct },
         }
     }
-}
 
-impl Mul<Real> for Mat3 {
-    type Output = Self;
+    pub fn get_uniform_scale_mat(factors: Vec3<S>) -> Mat3<S> {
+        Mat3 {
+            r0: Vec3 { x: factors.x, y: S::zero(), z: S::zero() },
+            r1: Vec3 { x: S::zero(), y: factors.y, z: S::zero() },
+            r2: Vec3 { x: S::zero(), y: S::zero(), z: factors.z },
+        }
+    }
 
-    fn mul(self, rhs: Real) -> Self::Output {
-        let mut output = self.clone();
-        output.r0 *= rhs;
-        output.r1 *= rhs;
-        output.r2 *= rhs;
-        output
+    pub fn get_scale_along_axis_mat(n: Vec3<S>, s: S) -> Mat3<S> {
+        debug_assert!(n.is_unit());
+
+        let s_min_one = s - S::one();
+
+        Mat3 {
+            r0: Vec3 { x: S::one() + s_min_one * n.x * n.x, y: s_min_one * n.x * n.y, z: s_min_one * n.x * n.z },
+            r1: Vec3 { x: s_min_one * n.x * n.y, y: S::one() + s_min_one * n.y * n.y, z: s_min_one * n.y * n.z },
+            r2: Vec3 { x: s_min_one * n.x * n.z, y: s_min_one * n.z * n.y, z: S::one() + s_min_one * n.z * n.z },
+        }
+    }
+
+    pub fn rotate_by_euler_flex_deg(&mut self, angles: Vec3<S>, order: RotationOrder) {
+        *self *= Mat3::get_rotation_mat_flex_euler_deg(angles, order)
+    }
+
+    pub fn rotate_by_euler_flex_rad(&mut self, angles: Vec3<S>, order: RotationOrder) {
+        *self *= Mat3::get_rotation_mat_flex_euler_rad(angles, order)
+    }
+
+    pub fn rotate_by_euler_upr_obj_deg(&mut self, pitch: S, heading: S, bank: S) {
+        *self *= Mat3::get_rotation_mat_euler_upr_obj_deg(pitch, heading, bank)
+    }
+
+    pub fn rotate_by_euler_upr_obj_rad(&mut self, pitch: S, heading: S, bank: S) {
+        *self *= Mat3::get_rotation_mat_euler_upr_obj_rad(pitch, heading, bank)
+    }
+
+    pub fn rotate_by_euler_obj_upr_deg(&mut self, pitch: S, heading: S, bank: S) {
+        *self *= Mat3::get_rotation_mat_euler_obj_upr_deg(pitch, heading, bank)
+    }
+
+    pub fn rotate_by_euler_obj_upr_rad(&mut self, pitch: S, heading: S, bank: S) {
+        *self *= Mat3::get_rotation_mat_euler_obj_upr_rad(pitch, heading, bank)
+    }
+
+    pub fn rotate_around_axis_deg(&mut self, n: Vec3<S>, theta: S) {
+        *self *= Mat3::get_angle_axis_mat_deg(n, theta);
+    }
+
+    pub fn rotate_around_axis_rad(&mut self, n: Vec3<S>, theta: S) {
+        *self *= Mat3::get_angle_axis_mat_rad(n, theta);
+    }
+
+    pub fn scale_uniformly(&mut self, factors: Vec3<S>) {
+        *self *= Mat3::get_uniform_scale_mat(factors);
+    }
+
+    pub fn scale_along_axis(&mut self, n: Vec3<S>, s: S) {
+        *self *= Mat3::get_scale_along_axis_mat(n, s);
     }
 }
 
-impl MulAssign<Mat3> for Mat3 {
-    fn mul_assign(&mut self, rhs: Mat3) {
-        let new = *self * rhs;
-        self.r0 = new.r0;
-        self.r1 = new.r1;
-        self.r2 = new.r2;
-    }
-}
-
-impl Div<Real> for Mat3 {
-    type Output = Mat3;
-
-    fn div(self, rhs: f32) -> Self::Output {
-        let inv_scale = 1.0 / rhs;
-        self * inv_scale
-    }
-}
-
-impl From<[[Real; 3]; 3]> for Mat3 {
-    fn from(mat: [[f32; 3]; 3]) -> Self {
-        Self::new_from_arrs(mat[0], mat[1], mat[2])
-    }
-}
-
-impl From<Quat> for Mat3 {
-    fn from(q: Quat) -> Self {
-        let x2 = q.v.x * q.v.x;
-        let y2 = q.v.y * q.v.y;
-        let z2 = q.v.z * q.v.z;
-
-        //Credits to https://github.com/Duckfan77 for helping remind me that basic arithmetic is
-        //to be taken seriously
-        Self::new(1.0 - 2.0 * (y2 + z2), 2.0 * (q.v.x * q.v.y + q.w * q.v.z), 2.0 * (q.v.x * q.v.z - q.w * q.v.y),
-                  2.0 * (q.v.x * q.v.y - q.w * q.v.z), 1.0 - 2.0 * (x2 + z2), 2.0 * (q.v.y * q.v.z + q.w * q.v.x),
-                  2.0 * (q.v.x * q.v.z + q.w * q.v.y), 2.0 * (q.v.y * q.v.z - q.w * q.v.x), 1.0 - 2.0 * (x2 + y2))
-    }
-}
-
-impl Index<usize> for Mat3 {
-    type Output = Vec3;
+impl<S> Index<usize> for Mat3<S> where S: num::Float + DefaultEpsilon<S> {
+    type Output = Vec3<S>;
 
     fn index(&self, index: usize) -> &Self::Output {
         match index {
@@ -285,8 +295,8 @@ impl Index<usize> for Mat3 {
     }
 }
 
-impl IndexMut<usize> for Mat3 {
-    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+impl<S> IndexMut<usize> for Mat3<S> where S: num::Float + DefaultEpsilon<S> {
+    fn index_mut(&mut self, index: usize) -> &mut Vec3<S> {
         match index {
             0 => &mut self.r0,
             1 => &mut self.r1,
@@ -296,13 +306,156 @@ impl IndexMut<usize> for Mat3 {
     }
 }
 
-impl PartialEq for Mat3 {
-    fn eq(&self, other: &Mat3) -> bool {
-        self.r0 == other.r0 && self.r1 == other.r1 && self.r2 == other.r2
+impl<S> Not for Mat3<S> where S: num::Float + DefaultEpsilon<S> {
+    type Output = Mat3<S>;
+
+    fn not(self) -> Self::Output {
+        self.inverse()
     }
 }
 
-impl fmt::Display for Mat3 {
+impl<S> Neg for Mat3<S> where S: num::Float + DefaultEpsilon<S> {
+    type Output = Mat3<S>;
+
+    fn neg(self) -> Self::Output {
+        Mat3 {
+            r0: -self.r0,
+            r1: -self.r1,
+            r2: -self.r2,
+        }
+    }
+}
+
+impl<S> Mul<Mat3<S>> for Mat3<S> where S: num::Float + DefaultEpsilon<S> {
+    type Output = Mat3<S>;
+
+    fn mul(self, rhs: Mat3<S>) -> Self::Output {
+        let rhs = rhs.transpose();
+        Mat3 {
+            r0: Vec3 { x: self[0].dot(rhs[0]), y: self[0].dot(rhs[1]), z: self[0].dot(rhs[2]) },
+            r1: Vec3 { x: self[1].dot(rhs[0]), y: self[1].dot(rhs[1]), z: self[1].dot(rhs[2]) },
+            r2: Vec3 { x: self[2].dot(rhs[0]), y: self[2].dot(rhs[1]), z: self[2].dot(rhs[2]) },
+        }
+    }
+}
+
+impl<S> Mul<Vec3<S>> for Mat3<S> where S: num::Float + DefaultEpsilon<S> {
+    type Output = Vec3<S>;
+
+    fn mul(self, rhs: Vec3<S>) -> Self::Output {
+        Vec3 {
+            x: self.r0.dot(rhs),
+            y: self.r1.dot(rhs),
+            z: self.r2.dot(rhs),
+        }
+    }
+}
+
+impl<S> Mul<S> for Mat3<S> where S: num::Float + DefaultEpsilon<S> {
+    type Output = Mat3<S>;
+
+    fn mul(self, rhs: S) -> Self::Output {
+        Mat3 {
+            r0: self.r0 * rhs,
+            r1: self.r1 * rhs,
+            r2: self.r2 * rhs,
+        }
+    }
+}
+
+impl<S> MulAssign<Mat3<S>> for Mat3<S> where S: num::Float + DefaultEpsilon<S> {
+    fn mul_assign(&mut self, rhs: Mat3<S>) {
+        let new = self.clone() * rhs;
+        self.r0 = new.r0;
+        self.r1 = new.r1;
+        self.r2 = new.r2;
+    }
+}
+
+impl<S> MulAssign<S> for Mat3<S> where S: num::Float + DefaultEpsilon<S> {
+    fn mul_assign(&mut self, rhs: S) {
+        let new = self.clone() * rhs;
+        self.r0 = new.r0;
+        self.r1 = new.r1;
+        self.r2 = new.r2;
+    }
+}
+
+impl<S> Div<S> for Mat3<S> where S: num::Float + DefaultEpsilon<S> {
+    type Output = Mat3<S>;
+
+    fn div(self, rhs: S) -> Self::Output {
+        let inv_scale = S::one() / rhs;
+        self * inv_scale
+    }
+}
+
+impl<S> Div<Mat3<S>> for Mat3<S> where S: num::Float + DefaultEpsilon<S> {
+    type Output = Mat3<S>;
+
+    fn div(self, rhs: Mat3<S>) -> Self::Output {
+        let inv_mat = rhs.inverse();
+        self * inv_mat
+    }
+}
+
+impl<S> DivAssign<S> for Mat3<S> where S: num::Float + DefaultEpsilon<S> {
+    fn div_assign(&mut self, rhs: S) {
+        let new = self.clone() / rhs;
+        self.r0 = new.r0;
+        self.r1 = new.r1;
+        self.r2 = new.r2;
+    }
+}
+
+impl<S> DivAssign<Mat3<S>> for Mat3<S> where S: num::Float + DefaultEpsilon<S> {
+    fn div_assign(&mut self, rhs: Mat3<S>) {
+        let new = self.clone() / rhs;
+        self.r0 = new.r0;
+        self.r1 = new.r1;
+        self.r2 = new.r2;
+    }
+}
+
+
+impl<S> From<[[S; 3]; 3]> for Mat3<S> where S: num::Float + DefaultEpsilon<S> {
+    fn from(mat: [[S; 3]; 3]) -> Mat3<S> {
+        Mat3 {
+            r0: Vec3::from(mat[0]),
+            r1: Vec3::from(mat[1]),
+            r2: Vec3::from(mat[2]),
+        }
+    }
+}
+
+
+impl<S> From<Quat<S>> for Mat3<S> where S: num::Float + DefaultEpsilon<S> {
+    fn from(q: Quat<S>) -> Mat3<S> {
+        let x2 = q.v.x * q.v.x;
+        let y2 = q.v.y * q.v.y;
+        let z2 = q.v.z * q.v.z;
+
+        let two = S::one() + S::one();
+
+        //Credits to https://github.com/Duckfan77 for helping remind me that basic arithmetic is
+        //to be taken seriously
+        Self::new(S::one() - two * (y2 + z2), two * (q.v.x * q.v.y + q.w * q.v.z), two * (q.v.x * q.v.z - q.w * q.v.y),
+                  two * (q.v.x * q.v.y - q.w * q.v.z), S::one() - two * (x2 + z2), two * (q.v.y * q.v.z + q.w * q.v.x),
+                  two * (q.v.x * q.v.z + q.w * q.v.y), two * (q.v.y * q.v.z - q.w * q.v.x), S::one() - two * (x2 + y2))
+    }
+}
+
+
+impl<S> PartialEq for Mat3<S> where S: num::Float + DefaultEpsilon<S> {
+    fn eq(&self, other: &Mat3<S>) -> bool {
+        self.r0 == other.r0 &&
+            self.r1 == other.r1 &&
+            self.r2 == other.r2
+    }
+}
+
+
+impl<S> fmt::Display for Mat3<S> where S: num::Float + DefaultEpsilon<S> + fmt::Display {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "⌈{:.2} {:.2} {:.2}⌉\n\
                    |{:.2} {:.2} {:.2}|\n\
@@ -313,24 +466,51 @@ impl fmt::Display for Mat3 {
     }
 }
 
-impl Default for Mat3 {
-    fn default() -> Self {
-        Mat3::identity()
-    }
-}
-
-impl glium::uniforms::AsUniformValue for Mat3 {
-    fn as_uniform_value(&self) -> glium::uniforms::UniformValue {
-        unsafe {
-            glium::uniforms::UniformValue::Mat3(
-                std::mem::transmute::<Self, [[f32; 3]; 3]>(self.transpose()))
+impl<S> From<Mat2<S>> for Mat3<S> where S: num::Float + DefaultEpsilon<S> {
+    fn from(mat: Mat2<S>) -> Mat3<S> {
+        Mat3 {
+            r0: Vec3::from(mat.r0),
+            r1: Vec3::from(mat.r1),
+            r2: Vec3 { x: S::zero(), y: S::zero(), z: S::one() },
         }
     }
 }
 
-unsafe impl glium::vertex::Attribute for Mat3 {
+impl<S> Default for Mat3<S> where S: num::Float + DefaultEpsilon<S> {
+    fn default() -> Mat3<S> {
+        Mat3::identity()
+    }
+}
+
+impl glium::uniforms::AsUniformValue for Mat3<f32> {
+    fn as_uniform_value(&self) -> glium::uniforms::UniformValue {
+        unsafe {
+            glium::uniforms::UniformValue::Mat3(std::mem::transmute::<Mat3<f32>, [[f32; 3]; 3]>(self.transpose()))
+        }
+    }
+}
+
+impl glium::uniforms::AsUniformValue for Mat3<f64> {
+    fn as_uniform_value(&self) -> glium::uniforms::UniformValue {
+        unsafe {
+            glium::uniforms::UniformValue::DoubleMat3(std::mem::transmute::<Mat3<f64>, [[f64; 3]; 3]>(self.transpose()))
+        }
+    }
+}
+
+unsafe impl glium::vertex::Attribute for Mat3<f32> {
     fn get_type() -> glium::vertex::AttributeType {
         glium::vertex::AttributeType::F32x3x3
+    }
+
+    fn is_supported<C: ?Sized>(caps: &C) -> bool where C: glium::CapabilitiesSource {
+        true
+    }
+}
+
+unsafe impl glium::vertex::Attribute for Mat3<f64> {
+    fn get_type() -> glium::vertex::AttributeType {
+        glium::vertex::AttributeType::F64x3x3
     }
 
     fn is_supported<C: ?Sized>(caps: &C) -> bool where C: glium::CapabilitiesSource {

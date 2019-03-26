@@ -1,138 +1,86 @@
 use std::fmt;
+use std::fmt::Display;
 use std::ops::*;
 
 use super::*;
 
-//going with row-major, since column major is the absolute worst to work with.
-
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
-pub struct Mat2 {
-    pub r0: Vec2,
-    pub r1: Vec2,
+pub struct Mat2<S> {
+    pub r0: Vec2<S>,
+    pub r1: Vec2<S>,
 }
 
-impl Mat2 {
-    pub const IDENTITY: Mat2 = Mat2 {
-        r0: Vec2 { x: 1.0, y: 0.0 },
-        r1: Vec2 { x: 0.0, y: 1.0 },
-    };
 
-    pub const EMPTY: Mat2 = Mat2 {
-        r0: Vec2 { x: 0.0, y: 0.0 },
-        r1: Vec2 { x: 0.0, y: 0.0 },
-    };
+impl<S> Mat2<S> where S: num::Float + DefaultEpsilon<S> {
+    pub fn identity() -> Mat2<S> {
+        Mat2 {
+            r0: Vec2 { x: S::one(), y: S::zero() },
+            r1: Vec2 { x: S::zero(), y: S::one() },
+        }
+    }
 
-    pub fn new(r0c0: Real, r0c1: Real,
-               r1c0: Real, r1c1: Real) -> Self {
+    pub fn empty() -> Mat2<S> {
+        Mat2 {
+            r0: Vec2::zero(),
+            r1: Vec2::zero(),
+        }
+    }
+
+    pub fn new(r0c0: S, r0c1: S,
+               r1c0: S, r1c1: S) -> Mat2<S> {
         Mat2 {
             r0: Vec2 { x: r0c0, y: r0c1 },
             r1: Vec2 { x: r1c0, y: r1c1 },
         }
     }
 
-    pub fn new_from_vec2s(r0: Vec2, r1: Vec2) -> Self {
+    pub fn new_from_vec2s(r0: Vec2<S>, r1: Vec2<S>) -> Mat2<S> {
         Mat2 { r0, r1 }
     }
 
-    pub fn new_from_arrs(r0: [Real; 2], r1: [Real; 2]) -> Self {
-        Self::new_from_vec2s(Vec2::from(r0), Vec2::from(r1))
+    pub fn new_from_arrs(r0: [S; 2], r1: [S; 2]) -> Mat2<S> {
+        Mat2 {
+            r0: Vec2::from(r0),
+            r1: Vec2::from(r1),
+        }
     }
 
-    pub fn determinant(&self) -> Real {
+    pub fn determinant(&self) -> S {
         self[0][0] * self[1][1] - self[1][0] * self[0][1]
     }
 
-    pub fn adjoint(&self) -> Mat2 {
-        Self::new(self[1][1], -self[0][1],
-                  -self[1][0], self[0][0])
+    pub fn adjoint(&self) -> Mat2<S> {
+        Mat2 {
+            r0: Vec2 { x: self[1][1], y: -self[0][1] },
+            r1: Vec2 { x: -self[1][0], y: self[0][0] },
+        }
     }
 
-    pub fn inverse(&self) -> Self {
+    pub fn inverse(&self) -> Mat2<S> {
         self.adjoint() / self.determinant()
     }
 
-    pub fn transpose(&self) -> Self {
-        Self::new(self[0][0], self[1][0],
-                  self[0][1], self[1][1])
+    pub fn transpose(&self) -> Mat2<S> {
+        Mat2 {
+            r0: Vec2 { x: self[0][0], y: self[1][0] },
+            r1: Vec2 { x: self[0][1], y: self[1][1] },
+        }
     }
 
-    pub fn rotation(theta: Real) -> Mat2 {
+    pub fn get_rotation_base(theta: S) -> Mat2<S> {
         let s = theta.sin();
         let c = theta.cos();
 
-        Mat2::new(c, s,
-                  -s, c)
+        Mat2 {
+            r0: Vec2 { x: c, y: s },
+            r1: Vec2 { x: -s, y: c },
+        }
     }
 }
 
-impl Not for Mat2 {
-    type Output = Mat2;
-
-    fn not(self) -> Self::Output {
-        self.inverse()
-    }
-}
-
-impl Mul<Mat2> for Mat2 {
-    type Output = Self;
-
-    fn mul(self, rhs: Mat2) -> Self::Output {
-        let rhs = rhs.transpose();
-
-        Mat2::new(Vec2::dot(self.r0, rhs.r0), Vec2::dot(self.r0, rhs.r1),
-                  Vec2::dot(self.r1, rhs.r0), Vec2::dot(self.r1, rhs.r1))
-    }
-}
-
-impl Mul<Vec2> for Mat2 {
-    type Output = Vec2;
-
-    fn mul(self, rhs: Vec2) -> Self::Output {
-        Vec2::new(
-            Vec2::dot(self.r0, rhs),
-            Vec2::dot(self.r1, rhs),
-        )
-    }
-}
-
-impl Mul<Real> for Mat2 {
-    type Output = Self;
-
-    fn mul(self, rhs: Real) -> Self::Output {
-        let mut output = self.clone();
-        output.r0 *= rhs;
-        output.r1 *= rhs;
-        output
-    }
-}
-
-impl MulAssign<Mat2> for Mat2 {
-    fn mul_assign(&mut self, rhs: Mat2) {
-        let new = *self * rhs;
-        self.r0 = new.r0;
-        self.r1 = new.r1;
-    }
-}
-
-impl Div<Real> for Mat2 {
-    type Output = Mat2;
-
-    fn div(self, rhs: f32) -> Self::Output {
-        let inv_scale = 1.0 / rhs;
-        self * inv_scale
-    }
-}
-
-impl From<[[Real; 2]; 2]> for Mat2 {
-    fn from(mat: [[f32; 2]; 2]) -> Self {
-        Self::new_from_arrs(mat[0], mat[1])
-    }
-}
-
-
-impl Index<usize> for Mat2 {
-    type Output = Vec2;
+impl<S> Index<usize> for Mat2<S> where S: num::Float + DefaultEpsilon<S> {
+    type Output = Vec2<S>;
 
     fn index(&self, index: usize) -> &Self::Output {
         match index {
@@ -143,8 +91,8 @@ impl Index<usize> for Mat2 {
     }
 }
 
-impl IndexMut<usize> for Mat2 {
-    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+impl<S> IndexMut<usize> for Mat2<S> where S: num::Float + DefaultEpsilon<S> {
+    fn index_mut(&mut self, index: usize) -> &mut Vec2<S> {
         match index {
             0 => &mut self.r0,
             1 => &mut self.r1,
@@ -153,13 +101,128 @@ impl IndexMut<usize> for Mat2 {
     }
 }
 
-impl PartialEq for Mat2 {
-    fn eq(&self, other: &Mat2) -> bool {
+impl<S> Neg for Mat2<S> where S: num::Float + DefaultEpsilon<S> {
+    type Output = Mat2<S>;
+
+    fn neg(self) -> Self::Output {
+        Mat2 {
+            r0: -self.r0,
+            r1: -self.r1,
+        }
+    }
+}
+
+impl<S> Not for Mat2<S> where S: num::Float + DefaultEpsilon<S> {
+    type Output = Mat2<S>;
+
+    fn not(self) -> Self::Output {
+        self.inverse()
+    }
+}
+
+impl<S> Mul<Mat2<S>> for Mat2<S> where S: num::Float + DefaultEpsilon<S> {
+    type Output = Mat2<S>;
+
+    fn mul(self, rhs: Mat2<S>) -> Self::Output {
+        let rhs = rhs.transpose();
+        Mat2 {
+            r0: Vec2 { x: self.r0.dot(rhs.r0), y: self.r0.dot(rhs.r1) },
+            r1: Vec2 { x: self.r1.dot(rhs.r0), y: self.r1.dot(rhs.r1) },
+        }
+    }
+}
+
+impl<S> Mul<Vec2<S>> for Mat2<S> where S: num::Float + DefaultEpsilon<S> {
+    type Output = Vec2<S>;
+
+    fn mul(self, rhs: Vec2<S>) -> Self::Output {
+        Vec2 {
+            x: self.r0.dot(rhs),
+            y: self.r1.dot(rhs),
+        }
+    }
+}
+
+impl<S> Mul<S> for Mat2<S> where S: num::Float + DefaultEpsilon<S> {
+    type Output = Mat2<S>;
+
+    fn mul(self, rhs: S) -> Self::Output {
+        Mat2 {
+            r0: self.r0 * rhs,
+            r1: self.r1 * rhs,
+        }
+    }
+}
+
+impl<S> MulAssign<Mat2<S>> for Mat2<S> where S: num::Float + DefaultEpsilon<S> {
+    fn mul_assign(&mut self, rhs: Mat2<S>) {
+        let new = self.clone() * rhs;
+        self.r0 = new.r0;
+        self.r1 = new.r1;
+    }
+}
+
+impl<S> MulAssign<S> for Mat2<S> where S: num::Float + DefaultEpsilon<S> {
+    fn mul_assign(&mut self, rhs: S) {
+        let new = self.clone() * rhs;
+        self.r0 = new.r0;
+        self.r1 = new.r1;
+    }
+}
+
+
+impl<S> Div<S> for Mat2<S> where S: num::Float + DefaultEpsilon<S> {
+    type Output = Mat2<S>;
+
+    fn div(self, rhs: S) -> Self::Output {
+        let inv_scale = S::one() / rhs;
+        self * inv_scale
+    }
+}
+
+impl<S> Div<Mat2<S>> for Mat2<S> where S: num::Float + DefaultEpsilon<S> {
+    type Output = Mat2<S>;
+
+    fn div(self, rhs: Mat2<S>) -> Self::Output {
+        let inv_mat = rhs.inverse();
+        self * inv_mat
+    }
+}
+
+impl<S> DivAssign<S> for Mat2<S> where S: num::Float + DefaultEpsilon<S> {
+    fn div_assign(&mut self, rhs: S) {
+        let new = self.clone() / rhs;
+        self.r0 = new.r0;
+        self.r1 = new.r1;
+    }
+}
+
+impl<S> DivAssign<Mat2<S>> for Mat2<S> where S: num::Float + DefaultEpsilon<S> {
+    fn div_assign(&mut self, rhs: Mat2<S>) {
+        let new = self.clone() / rhs;
+        self.r0 = new.r0;
+        self.r1 = new.r1;
+    }
+}
+
+
+impl<S> From<[[S; 2]; 2]> for Mat2<S> where S: num::Float + DefaultEpsilon<S> {
+    fn from(arr_mat: [[S; 2]; 2]) -> Mat2<S> {
+        Mat2 {
+            r0: Vec2::from(arr_mat[0]),
+            r1: Vec2::from(arr_mat[1]),
+        }
+    }
+}
+
+impl<S> PartialEq for Mat2<S> where S: num::Float + DefaultEpsilon<S> {
+    fn eq(&self, other: &Mat2<S>) -> bool {
         self.r0 == other.r0 && self.r1 == other.r1
     }
 }
 
-impl fmt::Display for Mat2 {
+
+impl<S> fmt::Display for Mat2<S> where S: num::Float + DefaultEpsilon<S> + fmt::Display {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "⌈{:.2} {:.2}⌉\n\
                    ⌊{:.2} {:.2}⌋",
@@ -168,24 +231,42 @@ impl fmt::Display for Mat2 {
     }
 }
 
-impl Default for Mat2 {
-    fn default() -> Self {
-        Mat2::IDENTITY
+impl<S> Default for Mat2<S> where S: num::Float + DefaultEpsilon<S> + fmt::Display {
+    fn default() -> Mat2<S> {
+        Mat2::identity()
     }
 }
 
-impl glium::uniforms::AsUniformValue for Mat2 {
+
+impl glium::uniforms::AsUniformValue for Mat2<f32> {
     fn as_uniform_value(&self) -> glium::uniforms::UniformValue {
         unsafe {
-            glium::uniforms::UniformValue::Mat2(
-                std::mem::transmute::<Self, [[f32; 2]; 2]>(self.transpose()))
+            glium::uniforms::UniformValue::Mat2(std::mem::transmute::<Mat2<f32>, [[f32; 2]; 2]>(self.transpose()))
         }
     }
 }
 
-unsafe impl glium::vertex::Attribute for Mat2 {
+impl glium::uniforms::AsUniformValue for Mat2<f64> {
+    fn as_uniform_value(&self) -> glium::uniforms::UniformValue {
+        unsafe {
+            glium::uniforms::UniformValue::DoubleMat2(std::mem::transmute::<Mat2<f64>, [[f64; 2]; 2]>(self.transpose()))
+        }
+    }
+}
+
+unsafe impl glium::vertex::Attribute for Mat2<f32> {
     fn get_type() -> glium::vertex::AttributeType {
         glium::vertex::AttributeType::F32x2x2
+    }
+
+    fn is_supported<C: ?Sized>(caps: &C) -> bool where C: glium::CapabilitiesSource {
+        true
+    }
+}
+
+unsafe impl glium::vertex::Attribute for Mat2<f64> {
+    fn get_type() -> glium::vertex::AttributeType {
+        glium::vertex::AttributeType::F64x2x2
     }
 
     fn is_supported<C: ?Sized>(caps: &C) -> bool where C: glium::CapabilitiesSource {

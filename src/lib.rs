@@ -1,13 +1,17 @@
-pub use ivec2::*;
-pub use ivec3::*;
-pub use ivec4::*;
-pub use mat2::*;
-pub use mat3::*;
-pub use mat4::*;
-pub use quat::*;
-pub use vec2::*;
-pub use vec3::*;
-pub use vec4::*;
+#[macro_use]
+pub use glium;
+pub use num;
+
+use ivec2::*;
+use ivec3::*;
+use ivec4::*;
+use mat2::*;
+use mat3::*;
+use mat4::*;
+use quat::*;
+use vec2::*;
+use vec3::*;
+use vec4::*;
 
 pub mod ivec2;
 pub mod ivec3;
@@ -20,30 +24,64 @@ pub mod vec2;
 pub mod vec3;
 pub mod vec4;
 
-pub type Real = f32;
-pub type Integer = i32;
+pub type Vec2n = Vec2<f32>;
+pub type Vec2h = Vec2<f64>;
 
-const DEF_F32_EPSILON: f32 = 0.00001;
+pub type Vec3n = Vec3<f32>;
+pub type Vec3h = Vec3<f64>;
 
-trait ApproxEqual {
-    fn approx_eq(self, rhs: Self, epsilon: f32) -> bool;
+pub type Vec4n = Vec4<f32>;
+pub type Vec4h = Vec4<f64>;
+
+pub type Mat2n = Mat2<f32>;
+pub type Mat2h = Mat2<f64>;
+
+pub type Mat3n = Mat3<f32>;
+pub type Mat3h = Mat3<f64>;
+
+pub type Mat4n = Mat4<f32>;
+pub type Mat4h = Mat4<f64>;
+
+pub type Quatn = Quat<f32>;
+pub type Quath = Quat<f64>;
+
+pub enum RotationOrder {
+    PHB,
+    PBH,
+    HPB,
+    HBP,
+    BPH,
+    BHP,
 }
 
-impl ApproxEqual for Real {
-    fn approx_eq(self, rhs: f32, epsilon: f32) -> bool {
+
+pub trait DefaultEpsilon<S> {
+    const DEF_EPSILON: S;
+}
+
+impl DefaultEpsilon<f32> for f32 {
+    const DEF_EPSILON: f32 = 1e-5;
+}
+
+impl DefaultEpsilon<f64> for f64 {
+    const DEF_EPSILON: f64 = 1e-15;
+}
+
+pub trait ApproxEqual<S> where S: num::Float + DefaultEpsilon<S> {
+    fn approx_eq(self, rhs: Self, epsilon: S) -> bool;
+}
+
+impl<S> ApproxEqual<S> for S where S: num::Float + DefaultEpsilon<S> {
+    fn approx_eq(self, rhs: S, epsilon: S) -> bool {
         let abs_a = self.abs();
         let abs_b = rhs.abs();
         let diff = (self - rhs).abs();
-
         if self == rhs {
             true
-        } else if self == 0.0 || rhs == 0.0 || diff < std::f32::MIN_POSITIVE {
-            // a or b is zero or both are extremely close to it
-            // relative error is less meaningful here
-            //diff < (epsilon * std::f32::MIN_POSITIVE) //idk about this bit, it's waaay too small, even with a relatively big epsilon
+        } else if self == S::zero() || rhs == S::zero() || diff < S::min_positive_value() {
             diff < epsilon
         } else {
-            diff / f32::min(abs_a + abs_b, std::f32::MAX) < epsilon
+            diff / S::min(abs_a + abs_b, S::max_value()) < epsilon
         }
     }
 }
