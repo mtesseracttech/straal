@@ -4,11 +4,11 @@ In the future, there may be additions to also do other types of calculations.
 
 ## Supported Types:
 ### Vectors of various sizes, both normal and Integer variants:
-* `(I)Vec2-4`
+* `(I)Vec2-4` in i32, i64, f32 and f64
 ### Square Matrices of Various sizes:
-* `Mat2-4`
+* `Mat2-4` in f32 and f64
 ### Quaternions
-* `Quat`
+* `Quat` in f32 and f64
 
 ## Features:
 * In an attempt to follow GLSL, all "standard" operations are done through operator overloads
@@ -22,7 +22,6 @@ In the future, there may be additions to also do other types of calculations.
 * The matrices are row-major, this is not the same as GLSL, uniforms are automatically converted to column major as they are passed into OpenGL, but be careful with it.
 
 ## To Do:
-* Finishing the quaternion implementation
-* More tests
+* A bunch of built-in opengl functions, like reflect, refract, mix, clamp, etc.
 * Complex Number type
 * Potentially a Geometry (primitives, tests, etc.) component.
