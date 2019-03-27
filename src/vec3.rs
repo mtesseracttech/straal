@@ -5,57 +5,100 @@ use super::*;
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
-pub struct Vec3 {
-    pub x: Real,
-    pub y: Real,
-    pub z: Real,
+pub struct Vec3<S> {
+    pub x: S,
+    pub y: S,
+    pub z: S,
 }
 
-impl Vec3 {
-    pub const ZERO: Vec3 = Vec3 { x: 0.0, y: 0.0, z: 0.0 };
-    pub const ONE: Vec3 = Vec3 { x: 1.0, y: 1.0, z: 1.0 };
-    pub const RIGHT: Vec3 = Vec3 { x: 1.0, y: 0.0, z: 0.0 };
-    pub const UP: Vec3 = Vec3 { x: 0.0, y: 1.0, z: 0.0 };
-    pub const FORWARD: Vec3 = Vec3 { x: 0.0, y: 0.0, z: 1.0 };
-
-    pub fn new(x: Real, y: Real, z: Real) -> Vec3 {
-        Vec3 { x, y, z }
-    }
-
-    pub fn all(t: Real) -> Vec3 {
-        Vec3 { x: t, y: t, z: t }
-    }
-
-    pub fn dot(lhs: Vec3, rhs: Vec3) -> Real {
-        lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z
-    }
-
-    pub fn cross(lhs: Vec3, rhs: Vec3) -> Vec3 {
+impl<S> Vec3<S> where S: FloatType<S>,
+{
+    pub fn zero() -> Vec3<S> {
         Vec3 {
-            x: lhs.y * rhs.z - lhs.z * rhs.y,
-            y: lhs.z * rhs.x - lhs.x * rhs.z,
-            z: lhs.x * rhs.y - lhs.y * rhs.x,
+            x: S::zero(),
+            y: S::zero(),
+            z: S::zero(),
         }
     }
 
-    pub fn length_squared(&self) -> Real {
-        Vec3::dot(*self, *self)
+    pub fn one() -> Vec3<S> {
+        Vec3 {
+            x: S::one(),
+            y: S::one(),
+            z: S::one(),
+        }
     }
 
-    pub fn length(&self) -> Real {
+    pub fn right() -> Vec3<S> {
+        Vec3 {
+            x: S::one(),
+            y: S::zero(),
+            z: S::zero(),
+        }
+    }
+
+    pub fn up() -> Vec3<S> {
+        Vec3 {
+            x: S::zero(),
+            y: S::one(),
+            z: S::zero(),
+        }
+    }
+
+    pub fn forward() -> Vec3<S> {
+        Vec3 {
+            x: S::zero(),
+            y: S::zero(),
+            z: S::one(),
+        }
+    }
+
+    pub fn new<U>(x: U, y: U, z: U) -> Vec3<S> where U: InputType {
+        Vec3 {
+            x: num::cast(x).unwrap(),
+            y: num::cast(y).unwrap(),
+            z: num::cast(z).unwrap(),
+        }
+    }
+
+    pub fn all<U>(t: U) -> Vec3<S> where U: InputType {
+        Vec3 {
+            x: num::cast(t).unwrap(),
+            y: num::cast(t).unwrap(),
+            z: num::cast(t).unwrap(),
+        }
+    }
+
+    pub fn dot(self, rhs: Vec3<S>) -> S {
+        self.x * rhs.x + self.y * rhs.y + self.z * rhs.z
+    }
+
+    pub fn cross(self, rhs: Vec3<S>) -> Vec3<S> {
+        Vec3 {
+            x: self.y * rhs.z - self.z * rhs.y,
+            y: self.z * rhs.x - self.x * rhs.z,
+            z: self.x * rhs.y - self.y * rhs.x,
+        }
+    }
+
+    pub fn length_squared(self) -> S {
+        self.dot(self)
+    }
+
+    pub fn length(self) -> S {
         self.length_squared().sqrt()
     }
 
     pub fn is_unit(&self) -> bool {
-        self.length_squared().approx_eq(1.0, DEF_F32_EPSILON)
+        self.length_squared().approx_eq(S::one(), S::DEF_EPSILON)
     }
 
     pub fn size() -> usize {
         3
     }
 
-    pub fn normalized(&self) -> Vec3 {
-        let scale = 1.0 / self.length();
+    pub fn normalized(&self) -> Vec3<S> {
+        let scale = S::one() / self.length();
         Vec3 {
             x: self.x,
             y: self.y,
@@ -64,14 +107,16 @@ impl Vec3 {
     }
 
     pub fn normalize(&mut self) {
-        let scale = 1.0 / self.length();
-        self.x *= scale;
-        self.y *= scale;
+        let scale = S::one() / self.length();
+        self.x = self.x * scale;
+        self.y = self.y * scale;
+        self.z = self.z * scale;
     }
 }
 
-impl Index<usize> for Vec3 {
-    type Output = Real;
+
+impl<S> Index<usize> for Vec3<S> where S: FloatType<S> {
+    type Output = S;
     fn index(&self, index: usize) -> &Self::Output {
         match index {
             0 => &self.x,
@@ -82,8 +127,8 @@ impl Index<usize> for Vec3 {
     }
 }
 
-impl IndexMut<usize> for Vec3 {
-    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+impl<S> IndexMut<usize> for Vec3<S> where S: FloatType<S> {
+    fn index_mut(&mut self, index: usize) -> &mut S {
         match index {
             0 => &mut self.x,
             1 => &mut self.y,
@@ -93,59 +138,63 @@ impl IndexMut<usize> for Vec3 {
     }
 }
 
-impl Neg for Vec3 {
-    type Output = Self;
+impl<S> Neg for Vec3<S> where S: FloatType<S> {
+    type Output = Vec3<S>;
 
-    fn neg(self) -> Self::Output { Self::new(-self.x, -self.y, -self.z) }
-}
-
-impl Add<Vec3> for Vec3 {
-    type Output = Self;
-
-    fn add(self, rhs: Vec3) -> Self::Output { Self::new(self.x + rhs.x, self.y + rhs.y, self.z + rhs.z) }
-}
-
-impl AddAssign<Vec3> for Vec3 {
-    fn add_assign(&mut self, rhs: Vec3) {
-        self.x += rhs.x;
-        self.y += rhs.y;
-        self.z += rhs.z;
-    }
-}
-
-impl Sub<Vec3> for Vec3 {
-    type Output = Self;
-
-    fn sub(self, rhs: Vec3) -> Self::Output {
-        Self::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z)
-    }
-}
-
-impl SubAssign<Vec3> for Vec3 {
-    fn sub_assign(&mut self, rhs: Vec3) {
-        self.x -= rhs.x;
-        self.y -= rhs.y;
-        self.z -= rhs.z;
-    }
-}
-
-impl Mul<Vec3> for Real {
-    type Output = Vec3;
-
-    fn mul(self, rhs: Vec3) -> Self::Output {
+    fn neg(self) -> Self::Output {
         Vec3 {
-            x: rhs.x * self,
-            y: rhs.y * self,
-            z: rhs.z * self,
+            x: -self.x,
+            y: -self.y,
+            z: -self.z,
         }
     }
 }
 
+impl<S> Add<Vec3<S>> for Vec3<S> where S: FloatType<S> {
+    type Output = Vec3<S>;
 
-impl Mul<Real> for Vec3 {
-    type Output = Self;
+    fn add(self, rhs: Vec3<S>) -> Vec3<S> {
+        Vec3 {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+            z: self.z + rhs.z,
+        }
+    }
+}
 
-    fn mul(self, rhs: Real) -> Self::Output {
+impl<S> AddAssign<Vec3<S>> for Vec3<S> where S: FloatType<S> {
+    fn add_assign(&mut self, rhs: Vec3<S>) {
+        self.x = self.x + rhs.x;
+        self.y = self.y + rhs.y;
+        self.z = self.z + rhs.z;
+    }
+}
+
+impl<S> Sub<Vec3<S>> for Vec3<S> where S: FloatType<S> {
+    type Output = Vec3<S>;
+
+    fn sub(self, rhs: Vec3<S>) -> Self::Output {
+        Vec3 {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+            z: self.z - rhs.z,
+        }
+    }
+}
+
+impl<S> SubAssign<Vec3<S>> for Vec3<S> where S: FloatType<S> {
+    fn sub_assign(&mut self, rhs: Vec3<S>) {
+        self.x = self.x - rhs.x;
+        self.y = self.y - rhs.y;
+        self.z = self.z - rhs.z;
+    }
+}
+
+
+impl<S> Mul<S> for Vec3<S> where S: FloatType<S> {
+    type Output = Vec3<S>;
+
+    fn mul(self, rhs: S) -> Self::Output {
         Vec3 {
             x: self.x * rhs,
             y: self.y * rhs,
@@ -155,142 +204,196 @@ impl Mul<Real> for Vec3 {
 }
 
 
-impl MulAssign<Real> for Vec3 {
-    fn mul_assign(&mut self, rhs: Real) {
-        self.x *= rhs;
-        self.y *= rhs;
-        self.z *= rhs;
+impl<S> MulAssign<S> for Vec3<S> where S: FloatType<S> {
+    fn mul_assign(&mut self, rhs: S) {
+        self.x = self.x * rhs;
+        self.y = self.y * rhs;
+        self.z = self.z * rhs;
     }
 }
 
-impl Mul<Vec3> for Vec3 {
-    type Output = Self;
+impl<S> Mul<Vec3<S>> for Vec3<S> where S: FloatType<S> {
+    type Output = Vec3<S>;
 
-    fn mul(self, rhs: Vec3) -> Self::Output {
-        Self::new(self.x * rhs.x, self.y * rhs.y, self.z * rhs.z)
-    }
-}
-
-impl MulAssign<Vec3> for Vec3 {
-    fn mul_assign(&mut self, rhs: Vec3) {
-        self.x *= rhs.x;
-        self.y *= rhs.y;
-        self.z *= rhs.z;
-    }
-}
-
-
-impl Div<Real> for Vec3 {
-    type Output = Self;
-
-    fn div(self, rhs: Real) -> Self::Output {
-        let inv = 1.0 / rhs;
-        Self::new(self.x * inv, self.y * inv, self.z * inv)
-    }
-}
-
-impl DivAssign<Real> for Vec3 {
-    fn div_assign(&mut self, rhs: Real) {
-        let inv = 1.0 / rhs;
-        self.x *= inv;
-        self.y *= inv;
-        self.z *= inv;
-    }
-}
-
-impl Div<Vec3> for Vec3 {
-    type Output = Self;
-
-    fn div(self, rhs: Vec3) -> Self::Output { Self::new(self.x / rhs.x, self.y / rhs.y, self.z / rhs.z) }
-}
-
-impl DivAssign<Vec3> for Vec3 {
-    fn div_assign(&mut self, rhs: Vec3) {
-        self.x /= rhs.x;
-        self.y /= rhs.y;
-        self.z /= rhs.z;
-    }
-}
-
-
-impl PartialEq for Vec3 {
-    fn eq(&self, other: &Vec3) -> bool {
-        self.x.approx_eq(other.x, DEF_F32_EPSILON) && self.y.approx_eq(other.y, DEF_F32_EPSILON) && self.z.approx_eq(other.z, DEF_F32_EPSILON)
-    }
-}
-
-impl fmt::Display for Vec3 {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { write!(f, "({:.2} {:.2} {:.2})", self.x, self.y, self.z) }
-}
-
-impl From<(Real, Real, Real)> for Vec3 {
-    fn from(tuple: (Real, Real, Real)) -> Self {
+    fn mul(self, rhs: Vec3<S>) -> Self::Output {
         Vec3 {
-            x: tuple.0,
-            y: tuple.1,
-            z: tuple.2,
+            x: self.x * rhs.x,
+            y: self.y * rhs.y,
+            z: self.z * rhs.z,
         }
     }
 }
 
-impl From<[f32; 3]> for Vec3 {
-    fn from(arr: [f32; 3]) -> Self {
+impl<S> MulAssign<Vec3<S>> for Vec3<S> where S: FloatType<S> {
+    fn mul_assign(&mut self, rhs: Vec3<S>) {
+        self.x = self.x * rhs.x;
+        self.y = self.y * rhs.y;
+        self.z = self.z * rhs.z;
+    }
+}
+
+
+impl<S> Div<S> for Vec3<S> where S: FloatType<S> {
+    type Output = Vec3<S>;
+
+    fn div(self, rhs: S) -> Self::Output {
+        let inv = S::one() / rhs;
         Vec3 {
-            x: arr[0],
-            y: arr[1],
-            z: arr[2],
+            x: self.x,
+            y: self.y,
+            z: self.z,
+        } * inv
+    }
+}
+
+impl<S> Div<Vec3<S>> for Vec3<S> where S: FloatType<S> {
+    type Output = Vec3<S>;
+
+    fn div(self, rhs: Vec3<S>) -> Self::Output {
+        Vec3 {
+            x: self.x / rhs.x,
+            y: self.y / rhs.y,
+            z: self.z / rhs.z,
         }
     }
 }
 
-impl From<Vec2> for Vec3 {
-    fn from(vec2: Vec2) -> Self {
+
+impl<S> DivAssign<S> for Vec3<S> where S: FloatType<S> {
+    fn div_assign(&mut self, rhs: S) {
+        let inv = S::one() / rhs;
+        self.x = self.x * inv;
+        self.y = self.y * inv;
+        self.z = self.z * inv;
+    }
+}
+
+impl<S> DivAssign<Vec3<S>> for Vec3<S> where S: FloatType<S> {
+    fn div_assign(&mut self, rhs: Vec3<S>) {
+        self.x = self.x / rhs.x;
+        self.y = self.y / rhs.y;
+        self.z = self.z / rhs.z;
+    }
+}
+
+
+impl<S> PartialEq for Vec3<S> where S: FloatType<S> {
+    fn eq(&self, other: &Vec3<S>) -> bool {
+        self.x.approx_eq(other.x, S::DEF_EPSILON) &&
+            self.y.approx_eq(other.y, S::DEF_EPSILON) &&
+            self.z.approx_eq(other.z, S::DEF_EPSILON)
+    }
+}
+
+impl<S> fmt::Display for Vec3<S> where S: FloatType<S> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "({:.3} {:.3} {:.3})", self.x, self.y, self.z)
+    }
+}
+
+impl<S, U> From<(U, U, U)> for Vec3<S> where S: FloatType<S>, U: InputType {
+    fn from(tuple: (U, U, U)) -> Vec3<S> {
         Vec3 {
-            x: vec2.x,
-            y: vec2.y,
-            z: 0.0,
+            x: num::cast(tuple.0).unwrap(),
+            y: num::cast(tuple.1).unwrap(),
+            z: num::cast(tuple.2).unwrap(),
         }
     }
 }
 
-impl From<(Real, Vec2)> for Vec3 {
-    fn from(other: (Real, Vec2)) -> Self {
+impl<S, U> From<[U; 3]> for Vec3<S> where S: FloatType<S>, U: InputType {
+    fn from(arr: [U; 3]) -> Vec3<S> {
         Vec3 {
-            x: other.0,
-            y: other.1.x,
-            z: other.1.y,
+            x: num::cast(arr[0]).unwrap(),
+            y: num::cast(arr[1]).unwrap(),
+            z: num::cast(arr[2]).unwrap(),
         }
     }
 }
 
-impl From<(Vec2, Real)> for Vec3 {
-    fn from(other: (Vec2, Real)) -> Self {
-        Self::new(other.0.x, other.0.y, other.1)
+impl<S, U> From<Vec2<U>> for Vec3<S> where S: FloatType<S>, U: InputType {
+    fn from(vec3: Vec2<U>) -> Vec3<S> {
+        Vec3 {
+            x: num::cast(vec3.x).unwrap(),
+            y: num::cast(vec3.y).unwrap(),
+            z: S::zero(),
+        }
     }
 }
 
-impl From<Vec4> for Vec3 {
-    fn from(vec4: Vec4) -> Self { Self::new(vec4.x, vec4.y, vec4.z) }
-}
 
-impl Default for Vec3 {
-    fn default() -> Self {
-        Vec3::ZERO
+impl<S, U> From<Vec4<U>> for Vec3<S> where S: FloatType<S>, U: InputType {
+    fn from(vec4: Vec4<U>) -> Vec3<S> {
+        Vec3 {
+            x: num::cast(vec4.x).unwrap(),
+            y: num::cast(vec4.y).unwrap(),
+            z: num::cast(vec4.z).unwrap(),
+        }
     }
 }
 
-impl glium::uniforms::AsUniformValue for Vec3 {
+impl<S, U> From<(U, Vec2<U>)> for Vec3<S> where S: FloatType<S>, U: InputType {
+    fn from(tuple: (U, Vec2<U>)) -> Vec3<S> {
+        Vec3 {
+            x: num::cast(tuple.0).unwrap(),
+            y: num::cast(tuple.1.x).unwrap(),
+            z: num::cast(tuple.1.y).unwrap(),
+        }
+    }
+}
+
+impl<S, U> From<(Vec2<U>, U)> for Vec3<S> where S: FloatType<S>, U: InputType {
+    fn from(tuple: (Vec2<U>, U)) -> Vec3<S> {
+        Vec3 {
+            x: num::cast(tuple.0.x).unwrap(),
+            y: num::cast(tuple.0.y).unwrap(),
+            z: num::cast(tuple.1).unwrap(),
+        }
+    }
+}
+
+
+impl<S> Default for Vec3<S> where S: FloatType<S> {
+    fn default() -> Vec3<S> {
+        Vec3::zero()
+    }
+}
+
+impl glium::uniforms::AsUniformValue for Vec3<f32> {
     fn as_uniform_value(&self) -> glium::uniforms::UniformValue {
-        unsafe { glium::uniforms::UniformValue::Vec3(std::mem::transmute::<Self, [f32; 3]>(*self)) }
+        unsafe {
+            glium::uniforms::UniformValue::Vec3(std::mem::transmute::<Vec3<f32>, [f32; 3]>(*self))
+        }
     }
 }
 
-unsafe impl glium::vertex::Attribute for Vec3 {
+
+impl glium::uniforms::AsUniformValue for Vec3<f64> {
+    fn as_uniform_value(&self) -> glium::uniforms::UniformValue {
+        unsafe {
+            glium::uniforms::UniformValue::DoubleVec3(std::mem::transmute::<Vec3<f64>, [f64; 3]>(*self))
+        }
+    }
+}
+
+
+unsafe impl glium::vertex::Attribute for Vec3<f32> {
     fn get_type() -> glium::vertex::AttributeType {
         glium::vertex::AttributeType::F32F32F32
     }
 
-    fn is_supported<C: ?Sized>(caps: &C) -> bool where C: glium::CapabilitiesSource {
+    fn is_supported<C: ?Sized>(_caps: &C) -> bool where C: glium::CapabilitiesSource {
+        true
+    }
+}
+
+
+unsafe impl glium::vertex::Attribute for Vec3<f64> {
+    fn get_type() -> glium::vertex::AttributeType {
+        glium::vertex::AttributeType::F64F64F64
+    }
+
+    fn is_supported<C: ?Sized>(_caps: &C) -> bool where C: glium::CapabilitiesSource {
         true
     }
 }
