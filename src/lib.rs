@@ -3,16 +3,16 @@ use core::fmt;
 pub use glium;
 pub use num;
 
-use ivec2::*;
-use ivec3::*;
-use ivec4::*;
-use mat2::*;
-use mat3::*;
-use mat4::*;
-use quat::*;
-use vec2::*;
-use vec3::*;
-use vec4::*;
+pub use ivec2::*;
+pub use ivec3::*;
+pub use ivec4::*;
+pub use mat2::*;
+pub use mat3::*;
+pub use mat4::*;
+pub use quat::*;
+pub use vec2::*;
+pub use vec3::*;
+pub use vec4::*;
 
 pub mod ivec2;
 pub mod ivec3;
