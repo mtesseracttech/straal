@@ -1,5 +1,4 @@
 use std::fmt;
-use std::fmt::Display;
 use std::ops::*;
 
 use super::*;
@@ -12,7 +11,7 @@ pub struct Mat2<S> {
 }
 
 
-impl<S> Mat2<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> Mat2<S> where S: FloatType<S> {
     pub fn identity() -> Mat2<S> {
         Mat2 {
             r0: Vec2 { x: S::one(), y: S::zero() },
@@ -27,11 +26,11 @@ impl<S> Mat2<S> where S: num::Float + DefaultEpsilon<S> {
         }
     }
 
-    pub fn new(r0c0: S, r0c1: S,
-               r1c0: S, r1c1: S) -> Mat2<S> {
+    pub fn new<U>(r0c0: U, r0c1: U,
+                  r1c0: U, r1c1: U) -> Mat2<S> where U: InputType {
         Mat2 {
-            r0: Vec2 { x: r0c0, y: r0c1 },
-            r1: Vec2 { x: r1c0, y: r1c1 },
+            r0: Vec2 { x: num::cast(r0c0).unwrap(), y: num::cast(r0c1).unwrap() },
+            r1: Vec2 { x: num::cast(r1c0).unwrap(), y: num::cast(r1c1).unwrap() },
         }
     }
 
@@ -79,7 +78,7 @@ impl<S> Mat2<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> Index<usize> for Mat2<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> Index<usize> for Mat2<S> where S: FloatType<S> {
     type Output = Vec2<S>;
 
     fn index(&self, index: usize) -> &Self::Output {
@@ -91,7 +90,7 @@ impl<S> Index<usize> for Mat2<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> IndexMut<usize> for Mat2<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> IndexMut<usize> for Mat2<S> where S: FloatType<S> {
     fn index_mut(&mut self, index: usize) -> &mut Vec2<S> {
         match index {
             0 => &mut self.r0,
@@ -101,7 +100,7 @@ impl<S> IndexMut<usize> for Mat2<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> Neg for Mat2<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> Neg for Mat2<S> where S: FloatType<S> {
     type Output = Mat2<S>;
 
     fn neg(self) -> Self::Output {
@@ -112,7 +111,7 @@ impl<S> Neg for Mat2<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> Not for Mat2<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> Not for Mat2<S> where S: FloatType<S> {
     type Output = Mat2<S>;
 
     fn not(self) -> Self::Output {
@@ -120,7 +119,7 @@ impl<S> Not for Mat2<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> Mul<Mat2<S>> for Mat2<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> Mul<Mat2<S>> for Mat2<S> where S: FloatType<S> {
     type Output = Mat2<S>;
 
     fn mul(self, rhs: Mat2<S>) -> Self::Output {
@@ -132,7 +131,7 @@ impl<S> Mul<Mat2<S>> for Mat2<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> Mul<Vec2<S>> for Mat2<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> Mul<Vec2<S>> for Mat2<S> where S: FloatType<S> {
     type Output = Vec2<S>;
 
     fn mul(self, rhs: Vec2<S>) -> Self::Output {
@@ -143,7 +142,7 @@ impl<S> Mul<Vec2<S>> for Mat2<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> Mul<S> for Mat2<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> Mul<S> for Mat2<S> where S: FloatType<S> {
     type Output = Mat2<S>;
 
     fn mul(self, rhs: S) -> Self::Output {
@@ -154,7 +153,7 @@ impl<S> Mul<S> for Mat2<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> MulAssign<Mat2<S>> for Mat2<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> MulAssign<Mat2<S>> for Mat2<S> where S: FloatType<S> {
     fn mul_assign(&mut self, rhs: Mat2<S>) {
         let new = self.clone() * rhs;
         self.r0 = new.r0;
@@ -162,7 +161,7 @@ impl<S> MulAssign<Mat2<S>> for Mat2<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> MulAssign<S> for Mat2<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> MulAssign<S> for Mat2<S> where S: FloatType<S> {
     fn mul_assign(&mut self, rhs: S) {
         let new = self.clone() * rhs;
         self.r0 = new.r0;
@@ -171,7 +170,7 @@ impl<S> MulAssign<S> for Mat2<S> where S: num::Float + DefaultEpsilon<S> {
 }
 
 
-impl<S> Div<S> for Mat2<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> Div<S> for Mat2<S> where S: FloatType<S> {
     type Output = Mat2<S>;
 
     fn div(self, rhs: S) -> Self::Output {
@@ -180,7 +179,7 @@ impl<S> Div<S> for Mat2<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> Div<Mat2<S>> for Mat2<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> Div<Mat2<S>> for Mat2<S> where S: FloatType<S> {
     type Output = Mat2<S>;
 
     fn div(self, rhs: Mat2<S>) -> Self::Output {
@@ -189,7 +188,7 @@ impl<S> Div<Mat2<S>> for Mat2<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> DivAssign<S> for Mat2<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> DivAssign<S> for Mat2<S> where S: FloatType<S> {
     fn div_assign(&mut self, rhs: S) {
         let new = self.clone() / rhs;
         self.r0 = new.r0;
@@ -197,7 +196,7 @@ impl<S> DivAssign<S> for Mat2<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> DivAssign<Mat2<S>> for Mat2<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> DivAssign<Mat2<S>> for Mat2<S> where S: FloatType<S> {
     fn div_assign(&mut self, rhs: Mat2<S>) {
         let new = self.clone() / rhs;
         self.r0 = new.r0;
@@ -206,7 +205,7 @@ impl<S> DivAssign<Mat2<S>> for Mat2<S> where S: num::Float + DefaultEpsilon<S> {
 }
 
 
-impl<S> From<[[S; 2]; 2]> for Mat2<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> From<[[S; 2]; 2]> for Mat2<S> where S: FloatType<S> {
     fn from(arr_mat: [[S; 2]; 2]) -> Mat2<S> {
         Mat2 {
             r0: Vec2::from(arr_mat[0]),
@@ -215,14 +214,14 @@ impl<S> From<[[S; 2]; 2]> for Mat2<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> PartialEq for Mat2<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> PartialEq for Mat2<S> where S: FloatType<S> {
     fn eq(&self, other: &Mat2<S>) -> bool {
         self.r0 == other.r0 && self.r1 == other.r1
     }
 }
 
 
-impl<S> fmt::Display for Mat2<S> where S: num::Float + DefaultEpsilon<S> + fmt::Display {
+impl<S> fmt::Display for Mat2<S> where S: FloatType<S> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "⌈{:.2} {:.2}⌉\n\
                    ⌊{:.2} {:.2}⌋",
@@ -231,7 +230,7 @@ impl<S> fmt::Display for Mat2<S> where S: num::Float + DefaultEpsilon<S> + fmt::
     }
 }
 
-impl<S> Default for Mat2<S> where S: num::Float + DefaultEpsilon<S> + fmt::Display {
+impl<S> Default for Mat2<S> where S: FloatType<S> {
     fn default() -> Mat2<S> {
         Mat2::identity()
     }
@@ -259,7 +258,7 @@ unsafe impl glium::vertex::Attribute for Mat2<f32> {
         glium::vertex::AttributeType::F32x2x2
     }
 
-    fn is_supported<C: ?Sized>(caps: &C) -> bool where C: glium::CapabilitiesSource {
+    fn is_supported<C: ?Sized>(_caps: &C) -> bool where C: glium::CapabilitiesSource {
         true
     }
 }
@@ -269,7 +268,7 @@ unsafe impl glium::vertex::Attribute for Mat2<f64> {
         glium::vertex::AttributeType::F64x2x2
     }
 
-    fn is_supported<C: ?Sized>(caps: &C) -> bool where C: glium::CapabilitiesSource {
+    fn is_supported<C: ?Sized>(_caps: &C) -> bool where C: glium::CapabilitiesSource {
         true
     }
 }

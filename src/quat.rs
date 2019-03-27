@@ -1,5 +1,4 @@
 use std::fmt;
-use std::fmt::Display;
 use std::ops::*;
 
 use super::*;
@@ -12,7 +11,7 @@ pub struct Quat<S> {
 }
 
 
-impl<S> Quat<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> Quat<S> where S: FloatType<S> {
     pub fn identity() -> Quat<S> {
         Quat {
             w: S::one(),
@@ -20,7 +19,7 @@ impl<S> Quat<S> where S: num::Float + DefaultEpsilon<S> {
         }
     }
 
-    pub fn new<U>(w: U, x: U, y: U, z: U) -> Quat<S> where U: num::Num + num::NumCast + Copy {
+    pub fn new<U>(w: U, x: U, y: U, z: U) -> Quat<S> where U: InputType {
         Quat {
             w: num::cast(w).unwrap(),
             v: Vec3 {
@@ -269,12 +268,16 @@ impl<S> Quat<S> where S: num::Float + DefaultEpsilon<S> {
             cos_omega = -cos_omega;
         }
 
-        let mut k0 = S::zero();
-        let mut k1 = S::zero();
+        //let mut k0 = S::zero();
+        //let mut k1 = S::zero();
 
         if cos_omega > num::cast(0.9999).unwrap() {
-            k0 = S::one() - t;
-            k1 = t;
+            let k0 = S::one() - t;
+            let k1 = t;
+            Quat {
+                w: q0.w * k0 + q1.w * k1,
+                v: q0.v * k0 + q1.v * k1,
+            }
         } else {
             let sin_omega = (S::one() - cos_omega * cos_omega).sqrt();
 
@@ -282,13 +285,12 @@ impl<S> Quat<S> where S: num::Float + DefaultEpsilon<S> {
 
             let one_over_sin_omega = S::one() / sin_omega;
 
-            k0 = ((S::one() - t) * omega).sin() * one_over_sin_omega;
-            k1 = (t * omega).sin() * one_over_sin_omega;
-        }
-
-        Quat {
-            w: q0.w * k0 + q1.w * k1,
-            v: q0.v * k0 + q1.v * k1,
+            let k0 = ((S::one() - t) * omega).sin() * one_over_sin_omega;
+            let k1 = (t * omega).sin() * one_over_sin_omega;
+            Quat {
+                w: q0.w * k0 + q1.w * k1,
+                v: q0.v * k0 + q1.v * k1,
+            }
         }
     }
 
@@ -314,7 +316,7 @@ impl<S> Quat<S> where S: num::Float + DefaultEpsilon<S> {
 }
 
 
-impl<S> Not for Quat<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> Not for Quat<S> where S: FloatType<S> {
     type Output = Quat<S>;
 
     fn not(self) -> Self::Output {
@@ -322,7 +324,7 @@ impl<S> Not for Quat<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> Neg for Quat<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> Neg for Quat<S> where S: FloatType<S> {
     type Output = Quat<S>;
 
     fn neg(self) -> Self::Output {
@@ -334,7 +336,7 @@ impl<S> Neg for Quat<S> where S: num::Float + DefaultEpsilon<S> {
 }
 
 
-impl<S> Mul<Quat<S>> for Quat<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> Mul<Quat<S>> for Quat<S> where S: FloatType<S> {
     type Output = Quat<S>;
 
     fn mul(self, rhs: Quat<S>) -> Quat<S> {
@@ -345,7 +347,7 @@ impl<S> Mul<Quat<S>> for Quat<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> Mul<Vec3<S>> for Quat<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> Mul<Vec3<S>> for Quat<S> where S: FloatType<S> {
     type Output = Vec3<S>;
 
     fn mul(self, rhs: Vec3<S>) -> Self::Output {
@@ -355,7 +357,7 @@ impl<S> Mul<Vec3<S>> for Quat<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> Mul<S> for Quat<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> Mul<S> for Quat<S> where S: FloatType<S> {
     type Output = Quat<S>;
 
     fn mul(self, rhs: S) -> Self::Output {
@@ -367,7 +369,7 @@ impl<S> Mul<S> for Quat<S> where S: num::Float + DefaultEpsilon<S> {
 }
 
 
-impl<S> MulAssign<Quat<S>> for Quat<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> MulAssign<Quat<S>> for Quat<S> where S: FloatType<S> {
     fn mul_assign(&mut self, rhs: Quat<S>) {
         let temp = *self * rhs;
         self.w = temp.w;
@@ -375,7 +377,7 @@ impl<S> MulAssign<Quat<S>> for Quat<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> MulAssign<S> for Quat<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> MulAssign<S> for Quat<S> where S: FloatType<S> {
     fn mul_assign(&mut self, rhs: S) {
         let temp = *self * rhs;
         self.w = temp.w;
@@ -383,7 +385,7 @@ impl<S> MulAssign<S> for Quat<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> Div<Quat<S>> for Quat<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> Div<Quat<S>> for Quat<S> where S: FloatType<S> {
     type Output = Quat<S>;
 
     fn div(self, rhs: Quat<S>) -> Self::Output {
@@ -391,7 +393,7 @@ impl<S> Div<Quat<S>> for Quat<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> Div<S> for Quat<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> Div<S> for Quat<S> where S: FloatType<S> {
     type Output = Quat<S>;
 
     fn div(self, rhs: S) -> Self::Output {
@@ -403,19 +405,19 @@ impl<S> Div<S> for Quat<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> PartialEq for Quat<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> PartialEq for Quat<S> where S: FloatType<S> {
     fn eq(&self, other: &Quat<S>) -> bool {
         self.w.approx_eq(other.w, S::DEF_EPSILON) && self.v == other.v
     }
 }
 
-impl<S> fmt::Display for Quat<S> where S: num::Float + DefaultEpsilon<S> + fmt::Display {
+impl<S> fmt::Display for Quat<S> where S: FloatType<S> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{:.2} ({:.2}i {:.2}j {:.2}k)", self.w, self.v.x, self.v.y, self.v.z)
     }
 }
 
-impl<S> From<(S, S, S, S)> for Quat<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> From<(S, S, S, S)> for Quat<S> where S: FloatType<S> {
     fn from(tuple: (S, S, S, S)) -> Quat<S> {
         Quat {
             w: tuple.0,
@@ -428,7 +430,7 @@ impl<S> From<(S, S, S, S)> for Quat<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> From<[S; 4]> for Quat<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> From<[S; 4]> for Quat<S> where S: FloatType<S> {
     fn from(arr: [S; 4]) -> Quat<S> {
         Quat {
             w: arr[0],
@@ -441,7 +443,7 @@ impl<S> From<[S; 4]> for Quat<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> From<Mat3<S>> for Quat<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> From<Mat3<S>> for Quat<S> where S: FloatType<S> {
     fn from(m: Mat3<S>) -> Quat<S> {
         let four_w_sq_m_1 = m[0][0] + m[1][1] + m[2][2];
         let four_x_sq_m_1 = m[0][0] - m[1][1] - m[2][2];
@@ -464,9 +466,8 @@ impl<S> From<Mat3<S>> for Quat<S> where S: num::Float + DefaultEpsilon<S> {
         }
 
         let biggest_val = (four_biggest_sq_m_1 + S::one()).sqrt() * num::cast(0.5).unwrap();
-        let quart = S::one() / (S::one() + S::one() + S::one() + S::one());
-        let mult = quart / biggest_val;
-        //let mult = 0.25 / biggest_val;
+        let one_fourth: S = num::cast(0.25).unwrap();
+        let mult = one_fourth / biggest_val;
 
         match biggest_index {
             0 => {
@@ -517,7 +518,7 @@ impl<S> From<Mat3<S>> for Quat<S> where S: num::Float + DefaultEpsilon<S> {
 }
 
 
-impl<S> Default for Quat<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> Default for Quat<S> where S: FloatType<S> {
     fn default() -> Quat<S> {
         Quat::identity()
     }

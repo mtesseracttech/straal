@@ -1,5 +1,4 @@
 use std::fmt;
-use std::fmt::Display;
 use std::ops::*;
 
 use super::*;
@@ -12,7 +11,7 @@ pub struct Vec3<S> {
     pub z: S,
 }
 
-impl<S> Vec3<S> where S: num::Float + DefaultEpsilon<S>,
+impl<S> Vec3<S> where S: FloatType<S>,
 {
     pub fn zero() -> Vec3<S> {
         Vec3 {
@@ -54,7 +53,7 @@ impl<S> Vec3<S> where S: num::Float + DefaultEpsilon<S>,
         }
     }
 
-    pub fn new<U>(x: U, y: U, z: U) -> Vec3<S> where U: num::Num + num::NumCast + Copy {
+    pub fn new<U>(x: U, y: U, z: U) -> Vec3<S> where U: InputType {
         Vec3 {
             x: num::cast(x).unwrap(),
             y: num::cast(y).unwrap(),
@@ -62,7 +61,7 @@ impl<S> Vec3<S> where S: num::Float + DefaultEpsilon<S>,
         }
     }
 
-    pub fn all<U>(t: U) -> Vec3<S> where U: num::Num + num::NumCast + Copy {
+    pub fn all<U>(t: U) -> Vec3<S> where U: InputType {
         Vec3 {
             x: num::cast(t).unwrap(),
             y: num::cast(t).unwrap(),
@@ -116,7 +115,7 @@ impl<S> Vec3<S> where S: num::Float + DefaultEpsilon<S>,
 }
 
 
-impl<S> Index<usize> for Vec3<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> Index<usize> for Vec3<S> where S: FloatType<S> {
     type Output = S;
     fn index(&self, index: usize) -> &Self::Output {
         match index {
@@ -128,7 +127,7 @@ impl<S> Index<usize> for Vec3<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> IndexMut<usize> for Vec3<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> IndexMut<usize> for Vec3<S> where S: FloatType<S> {
     fn index_mut(&mut self, index: usize) -> &mut S {
         match index {
             0 => &mut self.x,
@@ -139,7 +138,7 @@ impl<S> IndexMut<usize> for Vec3<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> Neg for Vec3<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> Neg for Vec3<S> where S: FloatType<S> {
     type Output = Vec3<S>;
 
     fn neg(self) -> Self::Output {
@@ -151,7 +150,7 @@ impl<S> Neg for Vec3<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> Add<Vec3<S>> for Vec3<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> Add<Vec3<S>> for Vec3<S> where S: FloatType<S> {
     type Output = Vec3<S>;
 
     fn add(self, rhs: Vec3<S>) -> Vec3<S> {
@@ -163,7 +162,7 @@ impl<S> Add<Vec3<S>> for Vec3<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> AddAssign<Vec3<S>> for Vec3<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> AddAssign<Vec3<S>> for Vec3<S> where S: FloatType<S> {
     fn add_assign(&mut self, rhs: Vec3<S>) {
         self.x = self.x + rhs.x;
         self.y = self.y + rhs.y;
@@ -171,7 +170,7 @@ impl<S> AddAssign<Vec3<S>> for Vec3<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> Sub<Vec3<S>> for Vec3<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> Sub<Vec3<S>> for Vec3<S> where S: FloatType<S> {
     type Output = Vec3<S>;
 
     fn sub(self, rhs: Vec3<S>) -> Self::Output {
@@ -183,7 +182,7 @@ impl<S> Sub<Vec3<S>> for Vec3<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> SubAssign<Vec3<S>> for Vec3<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> SubAssign<Vec3<S>> for Vec3<S> where S: FloatType<S> {
     fn sub_assign(&mut self, rhs: Vec3<S>) {
         self.x = self.x - rhs.x;
         self.y = self.y - rhs.y;
@@ -192,7 +191,7 @@ impl<S> SubAssign<Vec3<S>> for Vec3<S> where S: num::Float + DefaultEpsilon<S> {
 }
 
 
-impl<S> Mul<S> for Vec3<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> Mul<S> for Vec3<S> where S: FloatType<S> {
     type Output = Vec3<S>;
 
     fn mul(self, rhs: S) -> Self::Output {
@@ -205,7 +204,7 @@ impl<S> Mul<S> for Vec3<S> where S: num::Float + DefaultEpsilon<S> {
 }
 
 
-impl<S> MulAssign<S> for Vec3<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> MulAssign<S> for Vec3<S> where S: FloatType<S> {
     fn mul_assign(&mut self, rhs: S) {
         self.x = self.x * rhs;
         self.y = self.y * rhs;
@@ -213,7 +212,7 @@ impl<S> MulAssign<S> for Vec3<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> Mul<Vec3<S>> for Vec3<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> Mul<Vec3<S>> for Vec3<S> where S: FloatType<S> {
     type Output = Vec3<S>;
 
     fn mul(self, rhs: Vec3<S>) -> Self::Output {
@@ -225,7 +224,7 @@ impl<S> Mul<Vec3<S>> for Vec3<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> MulAssign<Vec3<S>> for Vec3<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> MulAssign<Vec3<S>> for Vec3<S> where S: FloatType<S> {
     fn mul_assign(&mut self, rhs: Vec3<S>) {
         self.x = self.x * rhs.x;
         self.y = self.y * rhs.y;
@@ -234,7 +233,7 @@ impl<S> MulAssign<Vec3<S>> for Vec3<S> where S: num::Float + DefaultEpsilon<S> {
 }
 
 
-impl<S> Div<S> for Vec3<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> Div<S> for Vec3<S> where S: FloatType<S> {
     type Output = Vec3<S>;
 
     fn div(self, rhs: S) -> Self::Output {
@@ -247,7 +246,7 @@ impl<S> Div<S> for Vec3<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> Div<Vec3<S>> for Vec3<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> Div<Vec3<S>> for Vec3<S> where S: FloatType<S> {
     type Output = Vec3<S>;
 
     fn div(self, rhs: Vec3<S>) -> Self::Output {
@@ -260,7 +259,7 @@ impl<S> Div<Vec3<S>> for Vec3<S> where S: num::Float + DefaultEpsilon<S> {
 }
 
 
-impl<S> DivAssign<S> for Vec3<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> DivAssign<S> for Vec3<S> where S: FloatType<S> {
     fn div_assign(&mut self, rhs: S) {
         let inv = S::one() / rhs;
         self.x = self.x * inv;
@@ -269,7 +268,7 @@ impl<S> DivAssign<S> for Vec3<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> DivAssign<Vec3<S>> for Vec3<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> DivAssign<Vec3<S>> for Vec3<S> where S: FloatType<S> {
     fn div_assign(&mut self, rhs: Vec3<S>) {
         self.x = self.x / rhs.x;
         self.y = self.y / rhs.y;
@@ -278,7 +277,7 @@ impl<S> DivAssign<Vec3<S>> for Vec3<S> where S: num::Float + DefaultEpsilon<S> {
 }
 
 
-impl<S> PartialEq for Vec3<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> PartialEq for Vec3<S> where S: FloatType<S> {
     fn eq(&self, other: &Vec3<S>) -> bool {
         self.x.approx_eq(other.x, S::DEF_EPSILON) &&
             self.y.approx_eq(other.y, S::DEF_EPSILON) &&
@@ -286,13 +285,13 @@ impl<S> PartialEq for Vec3<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> fmt::Display for Vec3<S> where S: num::Float + DefaultEpsilon<S> + fmt::Display {
+impl<S> fmt::Display for Vec3<S> where S: FloatType<S> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "({:.3} {:.3} {:.3})", self.x, self.y, self.z)
     }
 }
 
-impl<S, U> From<(U, U, U)> for Vec3<S> where S: num::Float + DefaultEpsilon<S>, U: num::Num + num::NumCast + Copy {
+impl<S, U> From<(U, U, U)> for Vec3<S> where S: FloatType<S>, U: InputType {
     fn from(tuple: (U, U, U)) -> Vec3<S> {
         Vec3 {
             x: num::cast(tuple.0).unwrap(),
@@ -302,7 +301,7 @@ impl<S, U> From<(U, U, U)> for Vec3<S> where S: num::Float + DefaultEpsilon<S>, 
     }
 }
 
-impl<S, U> From<[U; 3]> for Vec3<S> where S: num::Float + DefaultEpsilon<S>, U: num::Num + num::NumCast + Copy {
+impl<S, U> From<[U; 3]> for Vec3<S> where S: FloatType<S>, U: InputType {
     fn from(arr: [U; 3]) -> Vec3<S> {
         Vec3 {
             x: num::cast(arr[0]).unwrap(),
@@ -312,7 +311,7 @@ impl<S, U> From<[U; 3]> for Vec3<S> where S: num::Float + DefaultEpsilon<S>, U: 
     }
 }
 
-impl<S, U> From<Vec2<U>> for Vec3<S> where S: num::Float + DefaultEpsilon<S>, U: num::Num + num::NumCast + Copy {
+impl<S, U> From<Vec2<U>> for Vec3<S> where S: FloatType<S>, U: InputType {
     fn from(vec3: Vec2<U>) -> Vec3<S> {
         Vec3 {
             x: num::cast(vec3.x).unwrap(),
@@ -323,7 +322,7 @@ impl<S, U> From<Vec2<U>> for Vec3<S> where S: num::Float + DefaultEpsilon<S>, U:
 }
 
 
-impl<S, U> From<Vec4<U>> for Vec3<S> where S: num::Float + DefaultEpsilon<S>, U: num::Num + num::NumCast + Copy {
+impl<S, U> From<Vec4<U>> for Vec3<S> where S: FloatType<S>, U: InputType {
     fn from(vec4: Vec4<U>) -> Vec3<S> {
         Vec3 {
             x: num::cast(vec4.x).unwrap(),
@@ -333,7 +332,7 @@ impl<S, U> From<Vec4<U>> for Vec3<S> where S: num::Float + DefaultEpsilon<S>, U:
     }
 }
 
-impl<S, U> From<(U, Vec2<U>)> for Vec3<S> where S: num::Float + DefaultEpsilon<S>, U: num::Num + num::NumCast + Copy {
+impl<S, U> From<(U, Vec2<U>)> for Vec3<S> where S: FloatType<S>, U: InputType {
     fn from(tuple: (U, Vec2<U>)) -> Vec3<S> {
         Vec3 {
             x: num::cast(tuple.0).unwrap(),
@@ -343,7 +342,7 @@ impl<S, U> From<(U, Vec2<U>)> for Vec3<S> where S: num::Float + DefaultEpsilon<S
     }
 }
 
-impl<S, U> From<(Vec2<U>, U)> for Vec3<S> where S: num::Float + DefaultEpsilon<S>, U: num::Num + num::NumCast + Copy {
+impl<S, U> From<(Vec2<U>, U)> for Vec3<S> where S: FloatType<S>, U: InputType {
     fn from(tuple: (Vec2<U>, U)) -> Vec3<S> {
         Vec3 {
             x: num::cast(tuple.0.x).unwrap(),
@@ -354,7 +353,7 @@ impl<S, U> From<(Vec2<U>, U)> for Vec3<S> where S: num::Float + DefaultEpsilon<S
 }
 
 
-impl<S> Default for Vec3<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> Default for Vec3<S> where S: FloatType<S> {
     fn default() -> Vec3<S> {
         Vec3::zero()
     }
@@ -383,7 +382,7 @@ unsafe impl glium::vertex::Attribute for Vec3<f32> {
         glium::vertex::AttributeType::F32F32F32
     }
 
-    fn is_supported<C: ?Sized>(caps: &C) -> bool where C: glium::CapabilitiesSource {
+    fn is_supported<C: ?Sized>(_caps: &C) -> bool where C: glium::CapabilitiesSource {
         true
     }
 }
@@ -394,7 +393,7 @@ unsafe impl glium::vertex::Attribute for Vec3<f64> {
         glium::vertex::AttributeType::F64F64F64
     }
 
-    fn is_supported<C: ?Sized>(caps: &C) -> bool where C: glium::CapabilitiesSource {
+    fn is_supported<C: ?Sized>(_caps: &C) -> bool where C: glium::CapabilitiesSource {
         true
     }
 }

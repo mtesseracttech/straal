@@ -1,5 +1,4 @@
 use std::fmt;
-use std::fmt::Display;
 use std::ops::*;
 
 use super::*;
@@ -14,7 +13,7 @@ pub struct Mat4<S> {
 }
 
 
-impl<S> Mat4<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> Mat4<S> where S: FloatType<S> {
     pub fn identity() -> Mat4<S> {
         Mat4 {
             r0: Vec4 { x: S::one(), y: S::zero(), z: S::zero(), w: S::zero() },
@@ -33,15 +32,15 @@ impl<S> Mat4<S> where S: num::Float + DefaultEpsilon<S> {
         }
     }
 
-    pub fn new(r0c0: S, r0c1: S, r0c2: S, r0c3: S,
-               r1c0: S, r1c1: S, r1c2: S, r1c3: S,
-               r2c0: S, r2c1: S, r2c2: S, r2c3: S,
-               r3c0: S, r3c1: S, r3c2: S, r3c3: S) -> Mat4<S> {
+    pub fn new<U>(r0c0: U, r0c1: U, r0c2: U, r0c3: U,
+                  r1c0: U, r1c1: U, r1c2: U, r1c3: U,
+                  r2c0: U, r2c1: U, r2c2: U, r2c3: U,
+                  r3c0: U, r3c1: U, r3c2: U, r3c3: U) -> Mat4<S> where U: InputType {
         Mat4 {
-            r0: Vec4 { x: r0c0, y: r0c1, z: r0c2, w: r0c3 },
-            r1: Vec4 { x: r1c0, y: r1c1, z: r1c2, w: r1c3 },
-            r2: Vec4 { x: r2c0, y: r2c1, z: r2c2, w: r2c3 },
-            r3: Vec4 { x: r3c0, y: r3c1, z: r3c2, w: r3c3 },
+            r0: Vec4 { x: num::cast(r0c0).unwrap(), y: num::cast(r0c1).unwrap(), z: num::cast(r0c2).unwrap(), w: num::cast(r0c3).unwrap() },
+            r1: Vec4 { x: num::cast(r1c0).unwrap(), y: num::cast(r1c1).unwrap(), z: num::cast(r1c2).unwrap(), w: num::cast(r1c3).unwrap() },
+            r2: Vec4 { x: num::cast(r2c0).unwrap(), y: num::cast(r2c1).unwrap(), z: num::cast(r2c2).unwrap(), w: num::cast(r2c3).unwrap() },
+            r3: Vec4 { x: num::cast(r3c0).unwrap(), y: num::cast(r3c1).unwrap(), z: num::cast(r3c2).unwrap(), w: num::cast(r3c3).unwrap() },
         }
     }
 
@@ -59,7 +58,6 @@ impl<S> Mat4<S> where S: num::Float + DefaultEpsilon<S> {
     }
 
     pub fn determinant(&self) -> S {
-        //https://github.com/g-truc/glm/blob/7590260cf81f3e49f492e992f60dd88cd3265d14/glm/detail/func_matrix.inl#L222
         //Calculating the subfactors that will be reused (they all appear twice in the next step)
         let sf_00 = self[2][2] * self[3][3] - self[2][3] * self[3][2];
         let sf_01 = self[1][2] * self[3][3] - self[1][3] * self[3][2];
@@ -299,7 +297,7 @@ impl<S> Mat4<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> Index<usize> for Mat4<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> Index<usize> for Mat4<S> where S: FloatType<S> {
     type Output = Vec4<S>;
 
     fn index(&self, index: usize) -> &Self::Output {
@@ -313,7 +311,7 @@ impl<S> Index<usize> for Mat4<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> IndexMut<usize> for Mat4<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> IndexMut<usize> for Mat4<S> where S: FloatType<S> {
     fn index_mut(&mut self, index: usize) -> &mut Vec4<S> {
         match index {
             0 => &mut self.r0,
@@ -326,7 +324,7 @@ impl<S> IndexMut<usize> for Mat4<S> where S: num::Float + DefaultEpsilon<S> {
 }
 
 
-impl<S> Not for Mat4<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> Not for Mat4<S> where S: FloatType<S> {
     type Output = Mat4<S>;
 
     fn not(self) -> Self::Output {
@@ -334,7 +332,7 @@ impl<S> Not for Mat4<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> Neg for Mat4<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> Neg for Mat4<S> where S: FloatType<S> {
     type Output = Mat4<S>;
 
     fn neg(self) -> Self::Output {
@@ -348,7 +346,7 @@ impl<S> Neg for Mat4<S> where S: num::Float + DefaultEpsilon<S> {
 }
 
 
-impl<S> Mul<Mat4<S>> for Mat4<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> Mul<Mat4<S>> for Mat4<S> where S: FloatType<S> {
     type Output = Mat4<S>;
 
     fn mul(self, rhs: Mat4<S>) -> Self::Output {
@@ -362,7 +360,7 @@ impl<S> Mul<Mat4<S>> for Mat4<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> Mul<Vec4<S>> for Mat4<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> Mul<Vec4<S>> for Mat4<S> where S: FloatType<S> {
     type Output = Vec4<S>;
 
     fn mul(self, rhs: Vec4<S>) -> Self::Output {
@@ -375,7 +373,7 @@ impl<S> Mul<Vec4<S>> for Mat4<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> Mul<S> for Mat4<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> Mul<S> for Mat4<S> where S: FloatType<S> {
     type Output = Mat4<S>;
 
     fn mul(self, rhs: S) -> Self::Output {
@@ -388,7 +386,7 @@ impl<S> Mul<S> for Mat4<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> MulAssign<Mat4<S>> for Mat4<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> MulAssign<Mat4<S>> for Mat4<S> where S: FloatType<S> {
     fn mul_assign(&mut self, rhs: Mat4<S>) {
         let new = self.clone() * rhs;
         self.r0 = new.r0;
@@ -398,7 +396,7 @@ impl<S> MulAssign<Mat4<S>> for Mat4<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> Div<S> for Mat4<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> Div<S> for Mat4<S> where S: FloatType<S> {
     type Output = Mat4<S>;
 
     fn div(self, rhs: S) -> Self::Output {
@@ -407,7 +405,7 @@ impl<S> Div<S> for Mat4<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> Div<Mat4<S>> for Mat4<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> Div<Mat4<S>> for Mat4<S> where S: FloatType<S> {
     type Output = Mat4<S>;
 
     fn div(self, rhs: Mat4<S>) -> Self::Output {
@@ -416,7 +414,7 @@ impl<S> Div<Mat4<S>> for Mat4<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> DivAssign<S> for Mat4<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> DivAssign<S> for Mat4<S> where S: FloatType<S> {
     fn div_assign(&mut self, rhs: S) {
         let new = self.clone() / rhs;
         self.r0 = new.r0;
@@ -426,7 +424,7 @@ impl<S> DivAssign<S> for Mat4<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> DivAssign<Mat4<S>> for Mat4<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> DivAssign<Mat4<S>> for Mat4<S> where S: FloatType<S> {
     fn div_assign(&mut self, rhs: Mat4<S>) {
         let new = self.clone() / rhs;
         self.r0 = new.r0;
@@ -437,7 +435,7 @@ impl<S> DivAssign<Mat4<S>> for Mat4<S> where S: num::Float + DefaultEpsilon<S> {
 }
 
 
-impl<S> From<[[S; 4]; 4]> for Mat4<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> From<[[S; 4]; 4]> for Mat4<S> where S: FloatType<S> {
     fn from(mat: [[S; 4]; 4]) -> Mat4<S> {
         Mat4 {
             r0: Vec4::from(mat[0]),
@@ -448,14 +446,8 @@ impl<S> From<[[S; 4]; 4]> for Mat4<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-//impl From<Quat> for Mat4 {
-//    fn from(q: Quat) -> Self {
-//        Self::from(Mat3::from(q))
-//    }
-//}
 
-
-impl<S> PartialEq for Mat4<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> PartialEq for Mat4<S> where S: FloatType<S> {
     fn eq(&self, other: &Mat4<S>) -> bool {
         self.r0 == other.r0 &&
             self.r1 == other.r1 &&
@@ -464,7 +456,7 @@ impl<S> PartialEq for Mat4<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> fmt::Display for Mat4<S> where S: num::Float + DefaultEpsilon<S> + fmt::Display {
+impl<S> fmt::Display for Mat4<S> where S: FloatType<S> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "⌈{:.2} {:.2} {:.2} {:.2}⌉\n\
                    |{:.2} {:.2} {:.2} {:.2}|\n\
@@ -477,7 +469,7 @@ impl<S> fmt::Display for Mat4<S> where S: num::Float + DefaultEpsilon<S> + fmt::
     }
 }
 
-impl<S> From<Mat2<S>> for Mat4<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> From<Mat2<S>> for Mat4<S> where S: FloatType<S> {
     fn from(mat: Mat2<S>) -> Mat4<S> {
         Mat4 {
             r0: Vec4::from(mat.r0),
@@ -488,7 +480,7 @@ impl<S> From<Mat2<S>> for Mat4<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> From<Mat3<S>> for Mat4<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> From<Mat3<S>> for Mat4<S> where S: FloatType<S> {
     fn from(mat: Mat3<S>) -> Mat4<S> {
         Mat4 {
             r0: Vec4::from(mat.r0),
@@ -499,7 +491,13 @@ impl<S> From<Mat3<S>> for Mat4<S> where S: num::Float + DefaultEpsilon<S> {
     }
 }
 
-impl<S> Default for Mat4<S> where S: num::Float + DefaultEpsilon<S> {
+impl<S> From<Quat<S>> for Mat4<S> where S: FloatType<S> {
+    fn from(quat: Quat<S>) -> Mat4<S> {
+        Mat4::from(Mat3::from(quat))
+    }
+}
+
+impl<S> Default for Mat4<S> where S: FloatType<S> {
     fn default() -> Mat4<S> {
         Mat4::identity()
     }
@@ -527,7 +525,7 @@ unsafe impl glium::vertex::Attribute for Mat4<f32> {
         glium::vertex::AttributeType::F32x4x4
     }
 
-    fn is_supported<C: ?Sized>(caps: &C) -> bool where C: glium::CapabilitiesSource {
+    fn is_supported<C: ?Sized>(_caps: &C) -> bool where C: glium::CapabilitiesSource {
         true
     }
 }
@@ -537,7 +535,7 @@ unsafe impl glium::vertex::Attribute for Mat4<f64> {
         glium::vertex::AttributeType::F64x4x4
     }
 
-    fn is_supported<C: ?Sized>(caps: &C) -> bool where C: glium::CapabilitiesSource {
+    fn is_supported<C: ?Sized>(_caps: &C) -> bool where C: glium::CapabilitiesSource {
         true
     }
 }

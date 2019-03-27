@@ -2,8 +2,6 @@ mod test_helpers;
 
 #[cfg(test)]
 pub mod generic_tests {
-    use std::time::{Duration, SystemTime};
-
     use straal::*;
 
     use crate::test_helpers::*;
@@ -30,5 +28,14 @@ pub mod generic_tests {
         let v2 = Vec4h::all(2);
         let v3 = v1 * Vec4n::new(v2.x, -0.2, 47.2, -652.0);
         println!("{}", v3);
+    }
+
+
+    #[test]
+    fn ivec_gen_tests() {
+        let v1 = IVec2n::all(3.0);
+        let v2 = IVec2n::all(2.0);
+        let v3 = v1 / v2;
+        println!("{:?}", v3);
     }
 }

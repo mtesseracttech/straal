@@ -1,4 +1,5 @@
-#[macro_use]
+use core::fmt;
+
 pub use glium;
 pub use num;
 
@@ -45,6 +46,15 @@ pub type Mat4h = Mat4<f64>;
 pub type Quatn = Quat<f32>;
 pub type Quath = Quat<f64>;
 
+pub type IVec2n = IVec2<i32>;
+pub type IVec2h = IVec2<i64>;
+
+pub type IVec3n = IVec3<i32>;
+pub type IVec3h = IVec3<i64>;
+
+pub type IVec4n = IVec4<i32>;
+pub type IVec4h = IVec4<i64>;
+
 pub enum RotationOrder {
     PHB,
     PBH,
@@ -53,6 +63,19 @@ pub enum RotationOrder {
     BPH,
     BHP,
 }
+
+pub trait FloatType<T>: num::Float + DefaultEpsilon<T> + fmt::Display {}
+
+pub trait IntegerType: num::Integer + num::NumCast + num::Signed + Copy + fmt::Display {}
+
+pub trait InputType: num::Num + num::NumCast + Copy + fmt::Display {}
+
+
+impl<T: num::Float + DefaultEpsilon<T> + fmt::Display> FloatType<T> for T {}
+
+impl<T: num::Integer + num::NumCast + num::Signed + Copy + fmt::Display> IntegerType for T {}
+
+impl<T: num::Num + num::NumCast + Copy + fmt::Display> InputType for T {}
 
 
 pub trait DefaultEpsilon<S> {
