@@ -4,7 +4,7 @@ use std::ops::*;
 use super::*;
 
 #[repr(C)]
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Hash)]
 pub struct IVec4<S> {
     pub x: S,
     pub y: S,

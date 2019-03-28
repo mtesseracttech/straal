@@ -4,7 +4,7 @@ use std::ops::*;
 use super::*;
 
 #[repr(C)]
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Hash)]
 pub struct Mat4<S> {
     pub r0: Vec4<S>,
     pub r1: Vec4<S>,

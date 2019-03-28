@@ -4,7 +4,7 @@ use std::ops::*;
 use super::*;
 
 #[repr(C)]
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Hash)]
 pub struct Quat<S> {
     pub w: S,
     pub v: Vec3<S>,

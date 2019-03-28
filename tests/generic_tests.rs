@@ -2,6 +2,9 @@ mod test_helpers;
 
 #[cfg(test)]
 pub mod generic_tests {
+    use std::collections::hash_map::DefaultHasher;
+    use std::hash::{Hash, Hasher};
+
     use straal::*;
 
     use crate::test_helpers::*;
@@ -37,5 +40,18 @@ pub mod generic_tests {
         let v2 = IVec2n::all(2.0);
         let v3 = v1 / v2;
         println!("{:?}", v3);
+    }
+
+    #[test]
+    fn hash_tests() {
+        let v1 = IVec2n::all(3.0);
+        let v2 = IVec2n::all(2.0);
+        assert_ne!(calculate_hash(&v1), calculate_hash(&v2));
+    }
+
+    fn calculate_hash<T: Hash>(t: &T) -> u64 {
+        let mut s = DefaultHasher::new();
+        t.hash(&mut s);
+        s.finish()
     }
 }
