@@ -127,6 +127,66 @@ impl<S> Vec3<S> where S: FloatType<S>,
             (i * eta) - n * (eta * n.dot(i) + k.sqrt())
         }
     }
+
+    pub fn get_largest(&self) -> S {
+        self.x.max(self.y.max(self.z))
+    }
+
+    pub fn get_smallest(&self) -> S {
+        self.x.min(self.y.min(self.z))
+    }
+
+    pub fn get_largest_index(&self) -> usize {
+        let mut i = 0;
+        let mut largest = self.x;
+        if self.y > largest {
+            i = 1;
+        }
+        if self.z > largest {
+            i = 2
+        }
+        i
+    }
+
+    pub fn get_smallest_index(&self) -> usize {
+        let mut i = 0;
+        let mut smallest = self.x;
+        if self.y < smallest {
+            i = 1;
+        }
+        if self.z < smallest {
+            i = 2
+        }
+        i
+    }
+
+    pub fn distance(a: Vec3<S>, b: Vec3<S>) -> S {
+        (b - a).length()
+    }
+
+    pub fn mix(a: Vec3<S>, b: Vec3<S>, t: Vec3<S>) -> Vec3<S> {
+        (b - a) * (Vec3::one() - t)
+    }
+
+    pub fn mix_all(a: Vec3<S>, b: Vec3<S>, t: S) -> Vec3<S> {
+        (b - a) * (S::one() - t)
+    }
+
+    pub fn clamp(a: Vec3<S>, min: Vec3<S>, max: Vec3<S>) -> Vec3<S> {
+        Vec3 {
+            x: num::clamp(a.x, min.x, max.x),
+            y: num::clamp(a.y, min.y, max.y),
+            z: num::clamp(a.z, min.z, max.z),
+        }
+    }
+
+    pub fn clamp_all(a: Vec3<S>, min: S, max: S) -> Vec3<S> {
+        Vec3 {
+            x: num::clamp(a.x, min, max),
+            y: num::clamp(a.y, min, max),
+            z: num::clamp(a.z, min, max),
+        }
+    }
 }
 
 
@@ -294,8 +354,8 @@ impl<S> DivAssign<Vec3<S>> for Vec3<S> where S: FloatType<S> {
 
 impl<S> PartialEq for Vec3<S> where S: FloatType<S> {
     fn eq(&self, other: &Vec3<S>) -> bool {
-        self.x.approx_eq(other.x, S::DEF_EPSILON) &&
-            self.y.approx_eq(other.y, S::DEF_EPSILON) &&
+        self.x.approx_eq(other.x, S::DEF_EPSILON) & &
+            self.y.approx_eq(other.y, S::DEF_EPSILON) & &
             self.z.approx_eq(other.z, S::DEF_EPSILON)
     }
 }

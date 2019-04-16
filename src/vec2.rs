@@ -101,6 +101,58 @@ impl<S> Vec2<S> where S: FloatType<S> {
             (i * eta) - n * (eta * n.dot(i) + k.sqrt())
         }
     }
+
+    pub fn get_largest(&self) -> S {
+        self.x.max(self.y)
+    }
+
+    pub fn get_smallest(&self) -> S {
+        self.x.min(self.y)
+    }
+
+    pub fn get_largest_index(&self) -> usize {
+        let mut i = 0;
+        let mut largest = self.x;
+        if self.y > largest {
+            i = 1;
+        }
+        i
+    }
+
+    pub fn get_smallest_index(&self) -> usize {
+        let mut i = 0;
+        let mut smallest = self.x;
+        if self.y < smallest {
+            i = 1;
+        }
+        i
+    }
+
+    pub fn distance(a: Vec2<S>, b: Vec2<S>) -> S {
+        (b - a).length()
+    }
+
+    pub fn mix(a: Vec2<S>, b: Vec2<S>, t: Vec2<S>) -> Vec2<S> {
+        (b - a) * (Vec2::one() - t)
+    }
+
+    pub fn mix_all(a: Vec2<S>, b: Vec2<S>, t: S) -> Vec2<S> {
+        (b - a) * (S::one() - t)
+    }
+
+    pub fn clamp(a: Vec2<S>, min: Vec2<S>, max: Vec2<S>) -> Vec2<S> {
+        Vec2 {
+            x: num::clamp(a.x, min.x, max.x),
+            y: num::clamp(a.y, min.y, max.y),
+        }
+    }
+
+    pub fn clamp_all(a: Vec2<S>, min: S, max: S) -> Vec2<S> {
+        Vec2 {
+            x: num::clamp(a.x, min, max),
+            y: num::clamp(a.y, min, max),
+        }
+    }
 }
 
 impl<S> Index<usize> for Vec2<S> where S: FloatType<S> {
