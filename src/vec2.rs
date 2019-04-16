@@ -86,6 +86,21 @@ impl<S> Vec2<S> where S: FloatType<S> {
         self.x = self.x * scale;
         self.y = self.y * scale;
     }
+
+    pub fn reflect(i: Vec2<S>, n: Vec2<S>) -> Vec2<S> {
+        assert!(n.is_unit());
+        n * S::from(2).unwrap() * n.dot(i) - i
+    }
+
+    pub fn refract(i: Vec2<S>, n: Vec2<S>, eta: S) -> Vec2<S> {
+        assert!(n.is_unit());
+        let k = S::one() - eta * eta * (S::one() - n.dot(i) * n.dot(i));
+        if k < S::zero() {
+            Vec2::zero()
+        } else {
+            (i * eta) - n * (eta * n.dot(i) + k.sqrt())
+        }
+    }
 }
 
 impl<S> Index<usize> for Vec2<S> where S: FloatType<S> {

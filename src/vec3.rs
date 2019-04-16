@@ -112,6 +112,21 @@ impl<S> Vec3<S> where S: FloatType<S>,
         self.y = self.y * scale;
         self.z = self.z * scale;
     }
+
+    pub fn reflect(i: Vec3<S>, n: Vec3<S>) -> Vec3<S> {
+        assert!(n.is_unit());
+        n * S::from(2).unwrap() * n.dot(i) - i
+    }
+
+    pub fn refract(i: Vec3<S>, n: Vec3<S>, eta: S) -> Vec3<S> {
+        assert!(n.is_unit());
+        let k = S::one() - eta * eta * (S::one() - n.dot(i) * n.dot(i));
+        if k < S::zero() {
+            Vec3::zero()
+        } else {
+            (i * eta) - n * (eta * n.dot(i) + k.sqrt())
+        }
+    }
 }
 
 
