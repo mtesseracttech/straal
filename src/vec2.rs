@@ -115,6 +115,7 @@ impl<S> Vec2<S> where S: FloatType<S> {
         let mut largest = self.x;
         if self.y > largest {
             i = 1;
+            largest = self.y;
         }
         i
     }
@@ -124,6 +125,7 @@ impl<S> Vec2<S> where S: FloatType<S> {
         let mut smallest = self.x;
         if self.y < smallest {
             i = 1;
+            smallest = self.y;
         }
         i
     }

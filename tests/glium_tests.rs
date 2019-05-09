@@ -47,13 +47,15 @@ pub mod glium_test {
         let vertex_buffer = glium::VertexBuffer::new(&display, &shape).unwrap();
         let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
 
-        let program = Shader::load(&display, Shader::COLORED2D).unwrap();
+        let program = Shader::load_glium_shader(&display, Shader::COLORED2D).unwrap();
+
+        let mut model_matrix = Mat4n::identity();
 
         let mut closed = false;
         while !closed {
             let mut target = display.draw();
             target.clear_color(0.0, 0.0, 0.0, 0.0);
-            target.draw(&vertex_buffer, &indices, &program, &glium::uniforms::EmptyUniforms,
+            target.draw(&vertex_buffer, &indices, &program, &uniform! {model : model_matrix},
                         &Default::default()).unwrap();
             target.finish().unwrap();
 
@@ -108,7 +110,7 @@ pub mod glium_test {
         let mut time_previous = 0.0;
         let mut delta_time = 0.0;
 
-        let program = Shader::load(&display, Shader::COLORED2D).unwrap();
+        let program = Shader::load_glium_shader(&display, Shader::COLORED2D).unwrap();
 
         let mut model_matrix = get_model_matrix(&Vec3::new(0.0, 0.0, 0.0));
 
@@ -169,7 +171,7 @@ pub mod glium_test {
         let mut time_previous = 0.0;
         let mut delta_time = 0.0;
 
-        let program = Shader::load(&display, Shader::COLORED2D).unwrap();
+        let program = Shader::load_glium_shader(&display, Shader::COLORED2D).unwrap();
 
         let mut quat = Quatn::identity();
 
@@ -228,7 +230,7 @@ pub mod glium_test {
         let mut time_previous = 0.0;
         let mut delta_time = 0.0;
 
-        let program = Shader::load(&display, Shader::COLORED2D).unwrap();
+        let program = Shader::load_glium_shader(&display, Shader::COLORED2D).unwrap();
 
         let mut rotation_matrix = Mat3::identity();
 

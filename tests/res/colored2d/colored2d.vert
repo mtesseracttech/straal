@@ -2,11 +2,12 @@
 
 in vec2 position;
 in vec3 color;
-out vec3 vertColor;
 
 uniform mat4 model;
 
+out vec3 v_Color;
+
 void main() {
-    vertColor= color;
+    v_Color= color;
     gl_Position = model * vec4(position, 0.0, 1.0);
 }

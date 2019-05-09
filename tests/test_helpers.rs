@@ -105,7 +105,7 @@ pub struct VertexPosColor {
     color: Vec3n,
 }
 
-implement_vertex!(VertexPosColor, position,color);
+glium::implement_vertex!(VertexPosColor, position,color);
 
 pub fn get_triangle() -> Vec<VertexPosColor> {
     let vertex1 = VertexPosColor { position: Vec2::new(-0.5, -0.5), color: Vec3::new(1.0, 0.0, 0.0) };

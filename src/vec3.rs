@@ -141,9 +141,11 @@ impl<S> Vec3<S> where S: FloatType<S>,
         let mut largest = self.x;
         if self.y > largest {
             i = 1;
+            largest = self.y;
         }
         if self.z > largest {
-            i = 2
+            i = 2;
+            largest = self.z;
         }
         i
     }
@@ -153,9 +155,11 @@ impl<S> Vec3<S> where S: FloatType<S>,
         let mut smallest = self.x;
         if self.y < smallest {
             i = 1;
+            smallest = self.y;
         }
         if self.z < smallest {
-            i = 2
+            i = 2;
+            smallest = self.z;
         }
         i
     }
