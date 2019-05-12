@@ -54,12 +54,17 @@ impl<S> Quat<S> where S: FloatType<S> {
         self.conjugate() * inv_fact
     }
 
-    pub fn normalized(self) -> Quat<S> {
-        let inv = S::one() / self.magnitude();
-        Quat {
-            w: self.w * inv,
-            v: self.v * inv,
+    pub fn normalized_safe(self) -> Quat<S> {
+        let mag = self.magnitude();
+        if mag < S::DEF_EPSILON {
+            Quat::identity()
+        } else {
+            self / mag
         }
+    }
+
+    pub fn normalized(self) -> Quat<S> {
+        self / self.magnitude()
     }
 
     pub fn is_pure(self) -> bool {
@@ -267,9 +272,6 @@ impl<S> Quat<S> where S: FloatType<S> {
             q1 = -q1;
             cos_omega = -cos_omega;
         }
-
-        //let mut k0 = S::zero();
-        //let mut k1 = S::zero();
 
         if cos_omega > num::cast(0.9999).unwrap() {
             let k0 = S::one() - t;
