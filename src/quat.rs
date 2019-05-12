@@ -246,6 +246,20 @@ impl<S> Quat<S> where S: FloatType<S> {
         }
     }
 
+    pub fn get_quat_from_angle_axis_safe(theta: S, n: Vec3<S>) -> Quat<S> {
+        let magnitude = n.length();
+        if magnitude > S::DEF_EPSILON {
+            let half_theta = theta * num::cast(0.5).unwrap();
+            let s = half_theta.sin() / magnitude;
+            Quat {
+                w: half_theta.cos(),
+                v: n * half_theta.sin(),
+            }
+        } else {
+            Quat::identity()
+        }
+    }
+
     pub fn get_angle_axis_from_quat(&self) -> (Vec3<S>, S) {
         let q = if self.w > S::one() {
             self.normalized()
