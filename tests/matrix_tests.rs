@@ -66,24 +66,24 @@ pub mod matrix_test {
 
     #[test]
     fn matrix_inverses() {
-        let base = Mat2::new(4.0, 7.0,
-                             2.0, 6.0);
+        let base = Mat2n::new(4.0, 7.0,
+                              2.0, 6.0);
         let inv = base.inverse();
         let prod = base * inv;
         let det = base.determinant();
         assert_eq!(Mat2::identity(), prod);
 
-        let base = Mat3::new(2.0, -3.0, 1.0,
-                             2.0, 0.0, -1.0,
-                             1.0, 4.0, 5.0);
+        let base = Mat3n::new(2.0, -3.0, 1.0,
+                              2.0, 0.0, -1.0,
+                              1.0, 4.0, 5.0);
         let inv = base.inverse();
         let prod = base * inv;
         let det = base.determinant();
 
-        let base = Mat4::new(2.0, -3.0, 1.0, -3.45,
-                             2.0, 0.0, -1.0, 232.34267,
-                             1.0, 4.0, 5.0, 7.223,
-                             32.0, -0.453, 23.23, 1.0);
+        let base = Mat4n::new(2.0, -3.0, 1.0, -3.45,
+                              2.0, 0.0, -1.0, 232.34267,
+                              1.0, 4.0, 5.0, 7.223,
+                              32.0, -0.453, 23.23, 1.0);
         let inv = base.inverse();
         let prod = base * inv;
         let det = base.determinant();
@@ -93,8 +93,8 @@ pub mod matrix_test {
 
     #[test]
     fn rotation_matrices() {
-        let m0 = Mat3::angles_to_axes_zxy(Vec3::new(89.0, 89.0, 89.0));
-        let m1 = angles_to_axes_zxy_unoptimized(Vec3::new(89.0, 89.0, 89.0));
+        let m0 = Mat3n::get_rotation_mat_euler_obj_upr_deg(89.0, 89.0, 89.0);
+        let m1 = angles_to_axes_zxy_unoptimized(Vec3n::new(89.0, 89.0, 89.0));
         assert_eq!(m0, m1);
     }
 }
