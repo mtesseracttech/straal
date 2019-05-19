@@ -118,13 +118,13 @@ impl<S> Vec3<S> where S: FloatType<S>,
         n * S::from(2).unwrap() * n.dot(i) - i
     }
 
-    pub fn refract(i: Vec3<S>, n: Vec3<S>, eta: S) -> Vec3<S> {
+    pub fn refract(i: Vec3<S>, n: Vec3<S>, refraction_index: S) -> Vec3<S> {
         assert!(n.is_unit());
-        let k = S::one() - eta * eta * (S::one() - n.dot(i) * n.dot(i));
+        let k = S::one() - refraction_index * refraction_index * (S::one() - n.dot(i) * n.dot(i));
         if k < S::zero() {
             Vec3::zero()
         } else {
-            (i * eta) - n * (eta * n.dot(i) + k.sqrt())
+            (i * refraction_index) - n * (refraction_index * n.dot(i) + k.sqrt())
         }
     }
 
