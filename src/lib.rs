@@ -1,8 +1,8 @@
 use core::fmt;
 
+pub use glium;
 pub use num;
 
-pub use glium;
 pub use ivec2::*;
 pub use ivec3::*;
 pub use ivec4::*;
@@ -87,7 +87,7 @@ impl DefaultEpsilon<f32> for f32 {
 }
 
 impl DefaultEpsilon<f64> for f64 {
-    const DEF_EPSILON: f64 = 1e-14;
+    const DEF_EPSILON: f64 = 1e-13;
 }
 
 pub trait ApproxEqual<S> where S: num::Float + DefaultEpsilon<S> {
