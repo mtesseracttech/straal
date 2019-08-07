@@ -87,9 +87,10 @@ impl<S> Vec2<S> where S: FloatType<S> {
         self.y = self.y * scale;
     }
 
-    pub fn reflect(i: Vec2<S>, n: Vec2<S>) -> Vec2<S> {
+    pub fn reflect(i: Vec2<S>, n: Vec2<S>) -> Vec2<S>
+    {
         assert!(n.is_unit());
-        n * S::from(2).unwrap() * n.dot(i) - i
+        i - n * S::from(2).unwrap() * (i).dot(n)
     }
 
     pub fn refract(i: Vec2<S>, n: Vec2<S>, refraction_index: S) -> Vec2<S> {

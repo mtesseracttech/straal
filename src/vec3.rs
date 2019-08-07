@@ -113,9 +113,10 @@ impl<S> Vec3<S> where S: FloatType<S>,
         self.z = self.z * scale;
     }
 
-    pub fn reflect(i: Vec3<S>, n: Vec3<S>) -> Vec3<S> {
+    pub fn reflect(i: Vec3<S>, n: Vec3<S>) -> Vec3<S>
+    {
         assert!(n.is_unit());
-        n * S::from(2).unwrap() * n.dot(i) - i
+        i - n * S::from(2).unwrap() * (i).dot(n)
     }
 
     pub fn refract(i: Vec3<S>, n: Vec3<S>, refraction_index: S) -> Vec3<S> {
