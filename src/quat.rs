@@ -308,6 +308,7 @@ impl<S> Quat<S> where S: FloatType<S> {
                 v: q0.v * k0 + q1.v * k1,
             }
         }
+
     }
 
     pub fn lerp(self, other: Quat<S>, t: S) -> Quat<S> {
