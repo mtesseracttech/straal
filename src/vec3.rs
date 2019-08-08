@@ -116,17 +116,35 @@ impl<S> Vec3<S> where S: FloatType<S>,
 
     pub fn reflect(i: Vec3<S>, n: Vec3<S>) -> Vec3<S>
     {
-        assert!(n.is_unit());
         i - n * S::from(2).unwrap() * (i).dot(n)
     }
 
-    pub fn refract(i: Vec3<S>, n: Vec3<S>, refraction_index: S) -> Vec3<S> {
-        assert!(n.is_unit());
-        let k = S::one() - refraction_index * refraction_index * (S::one() - n.dot(i) * n.dot(i));
-        if k < S::zero() {
-            Vec3::zero()
+    pub fn reflect_safe(i: Vec3<S>, n: Vec3<S>) -> Vec3<S>
+    {
+        let n = n.normalized();
+        i - n * S::from(2).unwrap() * (i).dot(n)
+    }
+
+    pub fn refract(v: Vec3<S>, n: Vec3<S>, ni_over_nt: S) -> Option<Vec3<S>> {
+        let unit_v = v.normalized();
+        let dt = unit_v.dot(n);
+        let discriminant = S::one() - ni_over_nt * ni_over_nt * (S::one() - dt * dt);
+        if discriminant > S::zero() {
+            Some((v - n * dt) * ni_over_nt - n * ((discriminant).sqrt()))
         } else {
-            (i * refraction_index) - n * (refraction_index * n.dot(i) + k.sqrt())
+            None
+        }
+    }
+
+    pub fn refract_safe(v: Vec3<S>, n: Vec3<S>, ni_over_nt: S) -> Option<Vec3<S>> {
+        let n = n.normalized();
+        let unit_v = v.normalized();
+        let dt = unit_v.dot(n);
+        let discriminant = S::one() - ni_over_nt * ni_over_nt * (S::one() - dt * dt);
+        if discriminant > S::zero() {
+            Some((v - n * dt) * ni_over_nt - n * ((discriminant).sqrt()))
+        } else {
+            None
         }
     }
 

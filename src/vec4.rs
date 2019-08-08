@@ -127,20 +127,37 @@ impl<S> Vec4<S> where S: FloatType<S>,
 
     pub fn reflect(i: Vec4<S>, n: Vec4<S>) -> Vec4<S>
     {
-        assert!(n.is_unit());
         i - n * S::from(2).unwrap() * (i).dot(n)
     }
 
-    pub fn refract(i: Vec4<S>, n: Vec4<S>, refraction_index: S) -> Vec4<S> {
-        assert!(n.is_unit());
-        let k = S::one() - refraction_index * refraction_index * (S::one() - n.dot(i) * n.dot(i));
-        if k < S::zero() {
-            Vec4::zero()
+    pub fn reflect_safe(i: Vec4<S>, n: Vec4<S>) -> Vec4<S>
+    {
+        let n = n.normalized();
+        i - n * S::from(2).unwrap() * (i).dot(n)
+    }
+
+    pub fn refract(v: Vec4<S>, n: Vec4<S>, ni_over_nt: S) -> Option<Vec4<S>> {
+        let unit_v = v.normalized();
+        let dt = unit_v.dot(n);
+        let discriminant = S::one() - ni_over_nt * ni_over_nt * (S::one() - dt * dt);
+        if discriminant > S::zero() {
+            Some((v - n * dt) * ni_over_nt - n * ((discriminant).sqrt()))
         } else {
-            (i * refraction_index) - n * (refraction_index * n.dot(i) + k.sqrt())
+            None
         }
     }
 
+    pub fn refract_safe(v: Vec4<S>, n: Vec4<S>, ni_over_nt: S) -> Option<Vec4<S>> {
+        let n = n.normalized();
+        let unit_v = v.normalized();
+        let dt = unit_v.dot(n);
+        let discriminant = S::one() - ni_over_nt * ni_over_nt * (S::one() - dt * dt);
+        if discriminant > S::zero() {
+            Some((v - n * dt) * ni_over_nt - n * ((discriminant).sqrt()))
+        } else {
+            None
+        }
+    }
     pub fn get_largest(&self) -> S {
         self.x.max(self.y.max(self.z.max(self.w)))
     }

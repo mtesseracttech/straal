@@ -21,5 +21,10 @@ pub mod vector_test {
         let vec_vec = vec![Vec3n::new(1, 2, 3), Vec3n::new(4, 5, 6), Vec3n::new(7, 8, 9)];
         let total: Vec3n = vec_vec.iter().sum();
         assert_eq!(Vec3n::new(12, 15, 18), total);
+
+        let i = Vec3n::new(1, -1, 0).normalized();
+        let n = Vec3n::new(0, 1, 0);
+        let r = Vec3n::refract(i, n, 0.66666);
+        println!("{:?}", r);
     }
 }
