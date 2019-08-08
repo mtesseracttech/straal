@@ -1,4 +1,5 @@
 use std::fmt;
+use std::iter::Sum;
 use std::ops::*;
 
 use super::*;
@@ -408,5 +409,28 @@ unsafe impl glium::vertex::Attribute for Vec2<f64> {
 
     fn is_supported<C: ?Sized>(_caps: &C) -> bool where C: glium::CapabilitiesSource {
         true
+    }
+}
+
+
+impl<S> Sum<Vec2<S>> for Vec2<S>
+    where
+        S: FloatType<S>,
+{
+    fn sum<I: Iterator<Item=Vec2<S>>>(iter: I) -> Self {
+        iter.fold(Vec2::<S>::zero(), |a, b|
+            a + b,
+        )
+    }
+}
+
+impl<'a, S> Sum<&'a Vec2<S>> for Vec2<S>
+    where
+        S: FloatType<S>,
+{
+    fn sum<I: Iterator<Item=&'a Vec2<S>>>(iter: I) -> Self {
+        iter.fold(Vec2::<S>::zero(), |a, b|
+            a + *b,
+        )
     }
 }
